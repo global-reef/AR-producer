@@ -2,13 +2,14 @@
 
 
 ## Libraries #############################################
-library(glmmTMB)
-library(dplyr)
-library(stringr)
-library(tibble)
-library(ggeffects)
-library(ggplot2)
-
+suppressPackageStartupMessages({
+  library(glmmTMB)
+  library(dplyr)
+  library(stringr)
+  library(tibble)
+  library(ggeffects)
+  library(ggplot2)
+})
 ## 1. Add time variables and clean size factor ################
 
 origin_date <- min(fish_long$Date, na.rm = TRUE)
@@ -22,8 +23,7 @@ fish_long <- fish_long %>%
 
 ## 2. Main Model: size structure by reef type ################
 
-# “Are size distributions different on artificial vs natural reefs,
-# within pairs, across all months pooled?”
+# “Are size distributions different on artificial vs natural reefs, within pairs, across all months pooled?”
 
 m1 <- glmmTMB(
   Count ~ Type * Size_Class_f +
@@ -182,7 +182,7 @@ fish_long_life_prob <- fish_long_prob %>%
     names_to  = "life_stage",
     values_to = "stage_Count"
   ) %>%
-  filter(stage_Count > 0) %>%   # fix: filter using stage_Count, not Count
+  filter(stage_Count > 0) %>%   
   mutate(
     life_stage = recode(
       life_stage,
@@ -212,193 +212,224 @@ capture.output(
 
 
 ## 6. PREDICTIONS AND PLOTS ###############################
+### Plot function for total fish and life stage models ###
 
-### Figure 1. Total fish density by reef type and pair ################
-
-pred_tot <- ggpredict(
-  m1,
-  terms     = c("Type", "Pair"),
-  condition = c(Inclusion_m = 10000)    # per hectare
-) %>% as.data.frame()
-
-p_tot <- ggplot(pred_tot, aes(x = x, y = predicted, color = group)) +
-  geom_point(size = 3, position = position_dodge(width = 0.4)) +
-  geom_errorbar(
-    aes(ymin = conf.low, ymax = conf.high),
-    width    = 0.15,
-    position = position_dodge(width = 0.4)
-  ) +
-  scale_color_manual(values = reef_cols) +
-  theme_clean +
-  labs(
-    x     = "Reef type",
-    y     = "Total fish density (ind. ha⁻¹)",
-    color = "Reef type"
+make_totalfish_plots <- function(m1,
+                                 m_time,
+                                 m_stage_fx,
+                                 m_stage_prob,
+                                 origin_date,
+                                 plots_dir,
+                                 analysis_date,
+                                 reef_cols,
+                                 theme_clean) {
+  
+  # Figure 1. Total fish density by reef type and pair
+  pred_tot <- ggpredict(
+    m1,
+    terms     = c("Type", "Pair"),
+    condition = c(Inclusion_m = 100)    # per 100 m2
+  ) %>% as.data.frame()
+  
+  p_tot <- ggplot(pred_tot, aes(x = x, y = predicted, color = group)) +
+    geom_point(size = 3, position = position_dodge(width = 0.4)) +
+    geom_errorbar(
+      aes(ymin = conf.low, ymax = conf.high),
+      width    = 0.15,
+      position = position_dodge(width = 0.4)
+    ) +
+    scale_color_manual(values = reef_cols) +
+    theme_clean +
+    labs(
+      x     = "Reef type",
+      y     = "Total fish density per 100 m²",
+      color = "Reef type"
+    )
+  
+  ggsave(
+    filename = file.path(plots_dir, paste0("Fig1_total_density_", analysis_date, ".png")),
+    plot     = p_tot,
+    width    = 6.5,
+    height   = 4.5,
+    dpi      = 300
   )
-
-ggsave(
-  filename = file.path(plots_dir, paste0("Fig1_total_density_", analysis_date, ".png")),
-  plot     = p_tot,
-  width    = 6.5,
-  height   = 4.5,
-  dpi      = 300
-)
-
-
-### Figure 2. Size structure by reef type ################
-
-pred_size <- ggpredict(
-  m1,
-  terms     = c("Size_Class_f", "Type"),
-  condition = c(Inclusion_m = 10000)
-) %>% as.data.frame()
-
-p_size <- ggplot(pred_size, aes(x = x, y = predicted, color = group)) +
-  geom_line(aes(group = group), linewidth = 0.9) +
-  geom_ribbon(
-    aes(ymin = conf.low, ymax = conf.high, fill = group),
-    alpha = 0.15,
-    color = NA
-  ) +
-  geom_point(size = 2.4) +
-  scale_color_manual(values = reef_cols) +
-  scale_fill_manual(values = reef_cols) +
-  theme_clean +
-  labs(
-    x     = "Size class (cm)",
-    y     = "Predicted density (ind. ha⁻¹)",
-    color = "Reef type",
-    fill  = "Reef type"
+  
+  
+  # Figure 2. Size structure by reef type
+  pred_size <- ggpredict(
+    m1,
+    terms     = c("Size_Class_f", "Type"),
+    condition = c(Inclusion_m = 100)
+  ) %>% as.data.frame()
+  
+  p_size <- ggplot(pred_size, aes(x = x, y = predicted, color = group)) +
+    geom_line(aes(group = group), linewidth = 0.9) +
+    geom_ribbon(
+      aes(ymin = conf.low, ymax = conf.high, fill = group),
+      alpha = 0.15,
+      color = NA
+    ) +
+    geom_point(size = 2.4) +
+    scale_color_manual(values = reef_cols) +
+    scale_fill_manual(values = reef_cols) +
+    theme_clean +
+    labs(
+      x     = "Size class (cm)",
+      y     = "Predicted density per 100 m²",
+      color = "Reef type",
+      fill  = "Reef type"
+    )
+  
+  ggsave(
+    filename = file.path(plots_dir, paste0("Fig2_size_structure_", analysis_date, ".png")),
+    plot     = p_size,
+    width    = 6.5,
+    height   = 4.5,
+    dpi      = 300
   )
-
-ggsave(
-  filename = file.path(plots_dir, paste0("Fig2_size_structure_", analysis_date, ".png")),
-  plot     = p_size,
-  width    = 6.5,
-  height   = 4.5,
-  dpi      = 300
-)
-
-
-### Figure 3. Time trend in total density by reef type ################
-
-pred_time <- ggpredict(
-  m_time,
-  terms     = c("date_s [minmax]", "Type"),
-  condition = c(Inclusion_m = 10000)
-) %>% as.data.frame()
-
-pred_time$x_date <- origin_date + pred_time$x
-
-p_time <- ggplot(pred_time, aes(x = x_date, y = predicted, color = group)) +
-  geom_line(linewidth = 0.9) +
-  geom_ribbon(
-    aes(ymin = conf.low, ymax = conf.high, fill = group),
-    alpha = 0.15,
-    color = NA
-  ) +
-  scale_color_manual(values = reef_cols) +
-  scale_fill_manual(values = reef_cols) +
-  theme_clean +
-  labs(
-    x     = "Date",
-    y     = "Predicted density (ind. ha⁻¹)",
-    color = "Reef type",
-    fill  = "Reef type"
+  
+  
+  # Figure 3. Time trend in total density by reef type
+  pred_time <- ggpredict(
+    m_time,
+    terms     = c("date_s [minmax]", "Type"),
+    condition = c(Inclusion_m = 100)
+  ) %>% as.data.frame()
+  
+  pred_time$x_date <- origin_date + pred_time$x
+  
+  p_time <- ggplot(pred_time, aes(x = x_date, y = predicted, color = group)) +
+    geom_line(linewidth = 0.9) +
+    geom_ribbon(
+      aes(ymin = conf.low, ymax = conf.high, fill = group),
+      alpha = 0.15,
+      color = NA
+    ) +
+    scale_color_manual(values = reef_cols) +
+    scale_fill_manual(values = reef_cols) +
+    theme_clean +
+    labs(
+      x     = "Date",
+      y     = "Predicted density per 100 m²",
+      color = "Reef type",
+      fill  = "Reef type"
+    )
+  
+  ggsave(
+    filename = file.path(plots_dir, paste0("Fig3_time_trend_", analysis_date, ".png")),
+    plot     = p_time,
+    width    = 6.5,
+    height   = 4.5,
+    dpi      = 300
   )
-
-ggsave(
-  filename = file.path(plots_dir, paste0("Fig3_time_trend_", analysis_date, ".png")),
-  plot     = p_time,
-  width    = 6.5,
-  height   = 4.5,
-  dpi      = 300
-)
-
-
-### SUPP Figure: deterministic life stage (juvenile / mixed / adult) ################
-
-pred_stage_det <- ggpredict(
-  m_stage_fx,
-  terms     = c("life_stage", "Type", "Pair"),
-  condition = c(Inclusion_m = 100)
-) %>% as.data.frame()
-
-pred_stage_det$x <- factor(
-  pred_stage_det$x,
-  levels = c("juvenile", "mixed", "adult"),
-  ordered = TRUE
-)
-
-p_pair_det <- ggplot(
-  pred_stage_det,
-  aes(x = x, y = predicted, color = group, fill = group, group = group)
-) +
-  geom_errorbar(
-    aes(ymin = conf.low, ymax = conf.high),
-    width    = 0.15,
-    position = position_dodge(width = 0.5)
-  ) +
-  geom_point(
-    size     = 2.4,
-    position = position_dodge(width = 0.5)
-  ) +
-  facet_wrap(~ facet, nrow = 1) +
-  scale_color_manual(values = reef_cols) +
-  scale_fill_manual(values = reef_cols) +
-  theme_clean +
-  labs(
-    x     = "Life stage",
-    y     = "Predicted count per 100 m²",
-    color = "Reef type",
-    fill  = "Reef type"
+  
+  
+  # Supplementary: deterministic life stage (juvenile / mixed / adult)
+  pred_stage_det <- ggpredict(
+    m_stage_fx,
+    terms     = c("life_stage", "Type", "Pair"),
+    condition = c(Inclusion_m = 100)
+  ) %>% as.data.frame()
+  
+  pred_stage_det$x <- factor(
+    pred_stage_det$x,
+    levels = c("juvenile", "mixed", "adult"),
+    ordered = TRUE
   )
-
-ggsave(
-  filename = file.path(plots_dir, paste0("Supp_Fig_lifestage_deterministic_", analysis_date, ".png")),
-  plot     = p_pair_det,
-  width    = 7,
-  height   = 4.5,
-  dpi      = 300
-)
-
-
-### MAIN Figure: probabilistic life stage (juvenile vs adult) ################
-
-pred_stage_prob <- ggpredict(
-  m_stage_prob,
-  terms     = c("life_stage", "Type", "Pair"),
-  condition = c(Inclusion_m = 100)
-) %>% as.data.frame()
-
-p_pair_prob <- ggplot(
-  pred_stage_prob,
-  aes(x = x, y = predicted, color = group, fill = group, group = group)
-) +
-  geom_errorbar(
-    aes(ymin = conf.low, ymax = conf.high),
-    width    = 0.15,
-    position = position_dodge(width = 0.5)
+  
+  p_pair_det <- ggplot(
+    pred_stage_det,
+    aes(x = x, y = predicted, color = group, fill = group, group = group)
   ) +
-  geom_point(
-    size     = 2.4,
-    position = position_dodge(width = 0.5)
-  ) +
-  facet_wrap(~ facet, nrow = 1) +
-  scale_color_manual(values = reef_cols) +
-  scale_fill_manual(values = reef_cols) +
-  theme_clean +
-  labs(
-    x     = "Life stage",
-    y     = "Predicted count per 100 m²",
-    color = "Reef type",
-    fill  = "Reef type"
+    geom_errorbar(
+      aes(ymin = conf.low, ymax = conf.high),
+      width    = 0.15,
+      position = position_dodge(width = 0.5)
+    ) +
+    geom_point(
+      size     = 2.4,
+      position = position_dodge(width = 0.5)
+    ) +
+    facet_wrap(~ facet, nrow = 1) +
+    scale_color_manual(values = reef_cols) +
+    scale_fill_manual(values = reef_cols) +
+    theme_clean +
+    labs(
+      x     = "Life stage",
+      y     = "Predicted count per 100 m²",
+      color = "Reef type",
+      fill  = "Reef type"
+    )
+  
+  ggsave(
+    filename = file.path(plots_dir, paste0("Supp_Fig_lifestage_deterministic_", analysis_date, ".png")),
+    plot     = p_pair_det,
+    width    = 7,
+    height   = 4.5,
+    dpi      = 300
   )
+  
+  
+  # Main: probabilistic life stage (juvenile vs adult)
+  pred_stage_prob <- ggpredict(
+    m_stage_prob,
+    terms     = c("life_stage", "Type", "Pair"),
+    condition = c(Inclusion_m = 100)
+  ) %>% as.data.frame()
+  
+  p_pair_prob <- ggplot(
+    pred_stage_prob,
+    aes(x = x, y = predicted, color = group, fill = group, group = group)
+  ) +
+    geom_errorbar(
+      aes(ymin = conf.low, ymax = conf.high),
+      width    = 0.15,
+      position = position_dodge(width = 0.5)
+    ) +
+    geom_point(
+      size     = 2.4,
+      position = position_dodge(width = 0.5)
+    ) +
+    facet_wrap(~ facet, nrow = 1) +
+    scale_color_manual(values = reef_cols) +
+    scale_fill_manual(values = reef_cols) +
+    theme_clean +
+    labs(
+      x     = "Life stage",
+      y     = "Predicted count per 100 m²",
+      color = "Reef type",
+      fill  = "Reef type"
+    )
+  
+  ggsave(
+    filename = file.path(plots_dir, paste0("Fig4_lifestage_prob_", analysis_date, ".png")),
+    plot     = p_pair_prob,
+    width    = 7,
+    height   = 4.5,
+    dpi      = 300
+  )
+  
+  # Return plots in case you want them in the console
+  invisible(list(
+    p_tot       = p_tot,
+    p_size      = p_size,
+    p_time      = p_time,
+    p_pair_det  = p_pair_det,
+    p_pair_prob = p_pair_prob
+  ))
+}
 
-ggsave(
-  filename = file.path(plots_dir, paste0("Fig4_lifestage_prob_", analysis_date, ".png")),
-  plot     = p_pair_prob,
-  width    = 7,
-  height   = 4.5,
-  dpi      = 300
+plots_totalfish <- make_totalfish_plots(
+  m1            = m1,
+  m_time        = m_time,
+  m_stage_fx    = m_stage_fx,
+  m_stage_prob  = m_stage_prob,
+  origin_date   = origin_date,
+  plots_dir     = plots_dir,
+  analysis_date = analysis_date,
+  reef_cols     = reef_cols,
+  theme_clean   = theme_clean
 )
+# can then inspect any plot interactively with e.g. plots_totalfish$p_pair_prob. 
+
+message("✅ Main models done! Plots and resules saved to to: ", output_dir)

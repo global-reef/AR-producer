@@ -1,0 +1,48 @@
+ Family: nbinom2  ( log )
+Formula:          Count ~ Type * fgroup * Pair + date_s + Count.Type + offset(log(Inclusion_m)) +  
+    (1 | Site) + (1 | survey_id)
+Data: fish_fg
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+   3905.8    4018.2   -1924.9    3849.8       382 
+
+Random effects:
+
+Conditional model:
+ Groups    Name        Variance  Std.Dev. 
+ Site      (Intercept) 2.049e-09 4.526e-05
+ survey_id (Intercept) 2.098e-01 4.580e-01
+Number of obs: 410, groups:  Site, 6; survey_id, 164
+
+Dispersion parameter for nbinom2 family (): 0.579 
+
+Conditional model:
+                                                Estimate Std. Error z value Pr(>|z|)    
+(Intercept)                                     4.199095   0.306234  13.712  < 2e-16 ***
+TypeArtificial                                  0.759266   0.410403   1.850 0.064306 .  
+fgroupInvertivore                              -3.156894   0.483262  -6.532 6.47e-11 ***
+fgroupMesopredator                             -2.706350   0.549335  -4.927 8.37e-07 ***
+fgroupHTLP                                     -3.669078   0.523346  -7.011 2.37e-12 ***
+PairNo Name                                     0.417452   0.420927   0.992 0.321322    
+PairSattakut                                    0.657957   0.435102   1.512 0.130485    
+date_s                                         -0.030992   0.079495  -0.390 0.696641    
+Count.TypeStationary                                  NA         NA      NA       NA    
+TypeArtificial:fgroupInvertivore               -2.438893   0.657704  -3.708 0.000209 ***
+TypeArtificial:fgroupMesopredator               0.105099   0.712463   0.148 0.882725    
+TypeArtificial:fgroupHTLP                       0.592477   0.684197   0.866 0.386520    
+TypeArtificial:PairNo Name                     -0.612954   0.564170  -1.086 0.277271    
+TypeArtificial:PairSattakut                    -1.069523   0.626680  -1.707 0.087887 .  
+fgroupInvertivore:PairNo Name                  -0.627338   0.668745  -0.938 0.348202    
+fgroupMesopredator:PairNo Name                 -5.165392   0.936871  -5.513 3.52e-08 ***
+fgroupHTLP:PairNo Name                          0.387786   0.712093   0.545 0.586048    
+fgroupInvertivore:PairSattakut                 -0.100473   0.683637  -0.147 0.883156    
+fgroupMesopredator:PairSattakut                 1.569820   0.762118   2.060 0.039416 *  
+fgroupHTLP:PairSattakut                        -0.002807   0.738990  -0.004 0.996970    
+TypeArtificial:fgroupInvertivore:PairNo Name    1.466308   0.904019   1.622 0.104806    
+TypeArtificial:fgroupMesopredator:PairNo Name   1.158197   1.159026   0.999 0.317657    
+TypeArtificial:fgroupHTLP:PairNo Name          -0.345687   0.937531  -0.369 0.712336    
+TypeArtificial:fgroupInvertivore:PairSattakut   0.661864   1.010645   0.655 0.512537    
+TypeArtificial:fgroupMesopredator:PairSattakut  0.024795   1.062415   0.023 0.981380    
+TypeArtificial:fgroupHTLP:PairSattakut          0.165912   1.054078   0.157 0.874930    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1

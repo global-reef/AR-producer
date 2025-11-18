@@ -53,6 +53,14 @@ reef_cols <- c("Natural" = "#66BFA6", "Artificial" = "#007A87")
 
 
 ### run analysis #### 
-
+# set up and exploration 
 source("~/Documents/1_GLOBAL REEF/0_PROJECTS/AR_Producer_Attractor/AR_Producer/01_CLEAN.R")
+source("~/Documents/1_GLOBAL REEF/0_PROJECTS/AR_Producer_Attractor/AR_Producer/02_EXPLORE.R")
+source("~/Documents/1_GLOBAL REEF/0_PROJECTS/AR_Producer_Attractor/AR_Producer/02.1_matlookup.R")
+# modelling 
+source("~/Documents/1_GLOBAL REEF/0_PROJECTS/AR_Producer_Attractor/AR_Producer/03_TOTALMODEL.R")
+source("~/Documents/1_GLOBAL REEF/0_PROJECTS/AR_Producer_Attractor/AR_Producer/04_JUVPROPS.R")
+source("~/Documents/1_GLOBAL REEF/0_PROJECTS/AR_Producer_Attractor/AR_Producer/05_FUNGROUPS.R")
+source("~/Documents/1_GLOBAL REEF/0_PROJECTS/AR_Producer_Attractor/AR_Producer/06_SPP_MODELS.R")
+source("~/Documents/1_GLOBAL REEF/0_PROJECTS/AR_Producer_Attractor/AR_Producer/07_FINAL_PRODUCTION.R")
 

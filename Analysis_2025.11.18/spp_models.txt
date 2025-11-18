@@ -1,0 +1,33 @@
+species                         candidate   fitted   plot_ok   model_type      reason
+---------------------------------------------------------------------------------------------------------------
+Ballistoides viridescens        TRUE        TRUE     TRUE      rare/additive   low total n but stable structure
+Caesio xanthonota               TRUE        TRUE     TRUE      interaction     good counts and balance
+Chaetodon octofasciatus         TRUE        TRUE     FALSE     additive        NaN SE; weak adult counts
+Chaetodon weibeli               TRUE        TRUE     FALSE     interaction     Natural adult very low (n=3)
+Cheilinus fasciatus             TRUE        TRUE     FALSE     interaction     adult Natural sparse; NaN SE
+Diagramma pictum                TRUE        TRUE     TRUE      additive        balanced enough; no issues
+Ephippidae spp.                 FALSE       TRUE     FALSE     interaction     too few rows; model unstable
+Epinephelus fasciatus           TRUE        TRUE     TRUE      interaction     healthy totals
+Epinephelus fuscoguttatus       TRUE        TRUE     FALSE     interaction     adult sparse; NaN SE
+Flavocaranx bajad               TRUE        TRUE     TRUE      interaction     good totals; all cells >5
+Gnathanodon speciosus           FALSE       FALSE    FALSE     NA              extremely rare (n=7)
+Heniochus acuminatus            TRUE        TRUE     FALSE     interaction     Natural adult thin; AIC NA
+Labroides dimidiatus            TRUE        TRUE     FALSE     additive        thin adult counts; NaN SE
+Lutjanus griseus                TRUE        TRUE     TRUE      interaction     strong counts
+Lutjanus russellii              TRUE        TRUE     TRUE      interaction     strong counts
+Lutjanus vitta                  TRUE        TRUE     FALSE     interaction     adult Natural sparse; AIC NA
+Neopomacentrus cyanomos         TRUE        TRUE     TRUE      interaction     very strong counts
+Plectorhinchus chaetodonoides   FALSE       FALSE    FALSE     NA              n_rows=4; too rare
+Plectorhinchus gibbosus         FALSE       TRUE     TRUE      rare/additive   low total n but stable
+Plectropomus spp.               TRUE        TRUE     FALSE     interaction     weak juvenile/adult symmetry
+Pomacanthus annularis           FALSE       TRUE     FALSE     interaction     NaN SE from low adult
+Pomacentrus alexanderae         TRUE        TRUE     TRUE      interaction     strong counts
+Scarus rivulatus                TRUE        TRUE     TRUE      interaction     strong counts
+Siganus javus                   TRUE        TRUE     TRUE      interaction     strong counts
+Siganus virgatus                FALSE       FALSE    FALSE     NA              low n_rows and low cells
+Sphyraena barracuda             FALSE       FALSE    FALSE     NA              n_rows=6; too rare
+Sphyraena flavicauda            TRUE        TRUE     TRUE      interaction     strong counts
+Sphyraena jello                 FALSE       FALSE    FALSE     NA              n_rows=4; one level only
+Sphyraena qenie                 FALSE       FALSE    FALSE     NA              only 1 Type; fails candidate
+Thalassoma lunare               TRUE        TRUE     TRUE      additive        good but imbalanced across Pair
+Turrum fulvoguttatum            TRUE        TRUE     FALSE     additive        NaN SE; thin adult structure

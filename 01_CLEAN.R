@@ -204,11 +204,7 @@ clean_fish_size <- function(file_path, output_dir) {
       -any_of("Time_start")
     )
   
-  fish_long <- fish_long %>%
-    mutate(
-      Size_Class_f = factor(Size_Class, ordered = FALSE)  # take away factor orders
-    )
-  
+
   
   ## 9. Save cleaned file ----------------------------------------------------
   out_path <- file.path(output_dir, "fish_size_cleaned.rds")
@@ -266,4 +262,8 @@ fish_long <- fish_size %>%
   # keep rows where size class exists
   filter(!is.na(Size_Class))
 
+fish_long <- fish_long %>%
+  mutate(
+    Size_Class_f = factor(Size_Class, ordered = FALSE)  # take away factor orders
+  )
 
