@@ -1,5 +1,6 @@
  Family: nbinom2  ( log )
-Formula:          Count ~ Type * life_stage * Pair + date_num + Count.Type + offset(log(Inclusion_m)) +      (1 | Site) + (1 | survey_id)
+Formula:          Count ~ Type * life_stage * Pair + date_num + Count.Type + offset(log(Inclusion_m)) +  
+    (1 | Site) + (1 | survey_id)
 Data: fish_long_life
 
       AIC       BIC    logLik -2*log(L)  df.resid 
