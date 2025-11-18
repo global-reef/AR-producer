@@ -3,13 +3,12 @@
 library(ggplot2)
 
 # Enter the date for this analysis
-analysis_date <- "2025.11.13"  # update each run !!
+analysis_date <- "2025.11.18"  # update each run !!
 # File path (automatically join folder + date + filename)
 file_path <- paste0(
-  "~/Documents/1_GLOBAL REEF/0_PROJECTS/AR_Producer_Attractor/AR_Producer/DATA/",
-  analysis_date,
-  "_FishSize_MASTER.csv"
+  "~/Documents/1_GLOBAL REEF/0_PROJECTS/AR_Producer_Attractor/AR_Producer/DATA/2025.11.13_FishSize_MASTER.csv"
 )
+# ", analysis_date," type this instead of the actual date 
 raw_fish <- read.csv(file_path, stringsAsFactors=TRUE, strip.white=TRUE) 
 
 
@@ -23,10 +22,12 @@ fits_dir  <- file.path(output_dir, "fits")
 plots_dir <- file.path(output_dir, "plots")
 stats_dir <- file.path(output_dir, "stats")
 summ_dir  <- file.path(output_dir, "summaries")
+eda_dir  <- file.path(output_dir, "eda")
 dir.create(fits_dir,  showWarnings = FALSE, recursive = TRUE)
 dir.create(plots_dir, showWarnings = FALSE, recursive = TRUE)
 dir.create(stats_dir, showWarnings = FALSE, recursive = TRUE)
 dir.create(summ_dir,  showWarnings = FALSE, recursive = TRUE)
+dir.create(eda_dir,  showWarnings = FALSE, recursive = TRUE)
 
 ### custom theme and colour palettes ###############################################################
 theme_clean <- theme_minimal(base_family = "Arial") +
@@ -48,4 +49,10 @@ fg_cols <- c(
   "HTLP" = "#253494"
 ) 
 reef_cols <- c("Natural" = "#66BFA6", "Artificial" = "#007A87")
+
+
+
+### run analysis #### 
+
+source("~/Documents/1_GLOBAL REEF/0_PROJECTS/AR_Producer_Attractor/AR_Producer/01_CLEAN.R")
 

@@ -1,0 +1,42 @@
+ Family: nbinom2  ( log )
+Formula:          Count ~ Type * life_stage * Pair + date_num + Count.Type + offset(log(Inclusion_m)) +  
+    (1 | Site) + (1 | survey_id)
+Data: fish_long_life
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+  29319.6   29516.1  -14636.8   29273.6     37987 
+
+Random effects:
+
+Conditional model:
+ Groups    Name        Variance  Std.Dev. 
+ Site      (Intercept) 1.686e-08 0.0001299
+ survey_id (Intercept) 5.635e-01 0.7506453
+Number of obs: 38010, groups:  Site, 6; survey_id, 164
+
+Dispersion parameter for nbinom2 family (): 0.0187 
+
+Conditional model:
+                                              Estimate Std. Error z value Pr(>|z|)    
+(Intercept)                                 -5.2153387  0.3537380 -14.744  < 2e-16 ***
+TypeArtificial                               0.6804859  0.2703696   2.517  0.01184 *  
+life_stagemixed                              2.2270568  0.3694014   6.029 1.65e-09 ***
+life_stageadult                             -1.8718519  0.3765381  -4.971 6.65e-07 ***
+PairNo Name                                  0.7265299  0.2853823   2.546  0.01090 *  
+PairSattakut                                 1.1305378  0.2891880   3.909 9.25e-05 ***
+date_num                                     0.0004504  0.0006215   0.725  0.46857    
+Count.TypeStationary                         4.5599299  0.1592592  28.632  < 2e-16 ***
+TypeArtificial:life_stagemixed               0.7218405  0.4798903   1.504  0.13254    
+TypeArtificial:life_stageadult               3.2762599  0.4642217   7.058 1.69e-12 ***
+TypeArtificial:PairNo Name                  -0.8241906  0.3775493  -2.183  0.02904 *  
+TypeArtificial:PairSattakut                 -0.4024630  0.4242168  -0.949  0.34276    
+life_stagemixed:PairNo Name                 -1.3569107  0.4999578  -2.714  0.00665 ** 
+life_stageadult:PairNo Name                 -0.8297609  0.5248665  -1.581  0.11390    
+life_stagemixed:PairSattakut                 0.3212963  0.4985636   0.644  0.51929    
+life_stageadult:PairSattakut                 0.9684395  0.5103157   1.898  0.05773 .  
+TypeArtificial:life_stagemixed:PairNo Name   0.0536771  0.6573157   0.082  0.93492    
+TypeArtificial:life_stageadult:PairNo Name   0.3463264  0.6466238   0.536  0.59224    
+TypeArtificial:life_stagemixed:PairSattakut -0.6338701  0.7265653  -0.872  0.38298    
+TypeArtificial:life_stageadult:PairSattakut -1.3039647  0.6892820  -1.892  0.05852 .  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1

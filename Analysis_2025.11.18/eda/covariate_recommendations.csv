@@ -1,0 +1,14 @@
+variable,class,n,n_nonmiss,prop_nonmiss,n_levels,pseudo_R2,p_value,recommendation,note
+Site,factor,5265,5265,1,6,0.015044575774911917,0.2841007915653131,core_design,Site level heterogeneity. Usually random intercept.
+Pair,factor,5265,5265,1,3,0.0010954570689696297,0.8345994494689442,core_design,Paired design structure. Use as random effect or blocking factor.
+Type,factor,5265,5265,1,2,0.00359195291169756,0.24930090177218295,core_design,Treatment factor of interest (Natural vs Artificial). Always include as fixed effect.
+Date,Date,5265,5265,1,NA,0.0010897149635248349,0.5389402756176435,time_trend_optional,Continuous time trend. Consider as numeric or spline.
+Month_Year,factor,5265,5265,1,13,0.01684441823353966,0.7427200602021078,time_trend_optional,Seasonal blocking. Alternative to Date.
+Depth_m,factor,5265,4694,0.8915479582146248,45,0.06142459318777427,0.509891337000703,environmental_optional,Depth related structure. Consider if not too many NAs.
+Visibility_m,factor,5265,4695,0.8917378917378918,17,0.016531075360705527,0.9851185031718851,environmental_optional,Detection and foraging conditions. Consider as covariate.
+Current,factor,5265,4755,0.9031339031339032,2,1.7448076982051752e-4,0.8208911025800668,effort_optional,Hydrodynamics. Optional covariate.
+Boats,factor,5265,4605,0.8746438746438746,12,0.013304999275302043,0.9412714990908208,effort_optional,"Diver and boat presence. Effort related, optional."
+Time,character,5265,5025,0.9544159544159544,61,0.07931072509544057,0.1125308390205596,avoid_nuisance,"Clock time. Noisy, usually skip."
+Count.Type,factor,5265,5265,1,2,0.07117554500735324,1.6064962268607693e-9,core_design,Method (Belt vs Stationary). Include as fixed effect if both used.
+Inclusion_m,integer,5265,5265,1,NA,0.28342995168389484,7.191898272086904e-49,offset_or_weight_not_covariate,"Transect length. Use as offset or exposure, not as free covariate."
+Researchers,factor,5265,5265,1,53,0.08381774283744892,0.004795635100401586,avoid_nuisance,"Observer identity. Too many levels, avoid unless clear bias."

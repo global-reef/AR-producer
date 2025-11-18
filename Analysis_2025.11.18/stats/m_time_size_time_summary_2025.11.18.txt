@@ -1,0 +1,69 @@
+ Family: nbinom2  ( log )
+Formula:          Count ~ Type * Size_Class_f + Type * date_s + Size_Class_f *  
+    date_s + Pair + Count.Type + offset(log(Inclusion_m)) + (1 |      Site) + (1 | survey_id)
+Zero inflation:         ~Type + Size_Class_f
+Data: fish_long
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+  28652.7   29028.7  -14282.3   28564.7     37966 
+
+Random effects:
+
+Conditional model:
+ Groups    Name        Variance  Std.Dev. 
+ Site      (Intercept) 4.770e-08 0.0002184
+ survey_id (Intercept) 8.555e-01 0.9249525
+Number of obs: 38010, groups:  Site, 6; survey_id, 164
+
+Dispersion parameter for nbinom2 family (): 0.0395 
+
+Conditional model:
+                                   Estimate Std. Error z value Pr(>|z|)    
+(Intercept)                       -2.109459   0.442669  -4.765 1.89e-06 ***
+TypeArtificial                     1.162677   0.585609   1.985 0.047098 *  
+Size_Class_f1-2                    0.222249   0.380430   0.584 0.559083    
+Size_Class_f2-5                   -0.314366   0.355623  -0.884 0.376704    
+Size_Class_f5-10                  -2.007856   0.349161  -5.751 8.90e-09 ***
+Size_Class_f10-15                 -2.904596   0.374407  -7.758 8.64e-15 ***
+Size_Class_f15-20                 -1.526952   0.421300  -3.624 0.000290 ***
+Size_Class_f20-50                 -1.175721   0.421474  -2.790 0.005278 ** 
+Size_Class_f50-100                -3.760503   0.483088  -7.784 7.01e-15 ***
+Size_Class_f100+                  -8.983377   1.521146  -5.906 3.51e-09 ***
+date_s                            -0.204219   0.296951  -0.688 0.491629    
+PairNo Name                        0.020053   0.202217   0.099 0.921007    
+PairSattakut                       0.843103   0.228272   3.693 0.000221 ***
+Count.TypeStationary               3.448779   0.244945  14.080  < 2e-16 ***
+TypeArtificial:Size_Class_f1-2    -0.849070   0.625899  -1.357 0.174921    
+TypeArtificial:Size_Class_f2-5    -1.080619   0.595527  -1.815 0.069592 .  
+TypeArtificial:Size_Class_f5-10   -1.348040   0.587878  -2.293 0.021844 *  
+TypeArtificial:Size_Class_f10-15  -0.706839   0.603688  -1.171 0.241651    
+TypeArtificial:Size_Class_f15-20  -0.701277   0.633281  -1.107 0.268133    
+TypeArtificial:Size_Class_f20-50   0.502686   0.651237   0.772 0.440177    
+TypeArtificial:Size_Class_f50-100  2.631047   0.689834   3.814 0.000137 ***
+TypeArtificial:Size_Class_f100+    7.523912   1.650905   4.557 5.18e-06 ***
+TypeArtificial:date_s              0.274185   0.170498   1.608 0.107804    
+Size_Class_f1-2:date_s             0.040743   0.315220   0.129 0.897158    
+Size_Class_f2-5:date_s             0.196923   0.298349   0.660 0.509227    
+Size_Class_f5-10:date_s            0.121357   0.289857   0.419 0.675450    
+Size_Class_f10-15:date_s           0.218790   0.292532   0.748 0.454509    
+Size_Class_f15-20:date_s           0.294514   0.302376   0.974 0.330057    
+Size_Class_f20-50:date_s          -0.091662   0.307670  -0.298 0.765761    
+Size_Class_f50-100:date_s         -0.001461   0.321841  -0.005 0.996377    
+Size_Class_f100+:date_s           -1.702297   0.656045  -2.595 0.009465 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Zero-inflation model:
+                   Estimate Std. Error z value Pr(>|z|)    
+(Intercept)         1.50122    0.19460   7.714 1.22e-14 ***
+TypeArtificial      0.60284    0.13646   4.418 9.98e-06 ***
+Size_Class_f1-2    -0.42708    0.16848  -2.535   0.0112 *  
+Size_Class_f2-5    -1.14108    0.17562  -6.497 8.17e-11 ***
+Size_Class_f5-10   -2.67840    0.36416  -7.355 1.91e-13 ***
+Size_Class_f10-15  -3.29976    0.55249  -5.972 2.34e-09 ***
+Size_Class_f15-20  -3.11155    0.42865  -7.259 3.90e-13 ***
+Size_Class_f20-50  -3.69224    0.66450  -5.556 2.75e-08 ***
+Size_Class_f50-100 -2.69973    0.37003  -7.296 2.97e-13 ***
+Size_Class_f100+   -0.03339    0.31362  -0.106   0.9152    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
