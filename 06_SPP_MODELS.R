@@ -7,6 +7,7 @@ library(tidyr)
 library(tibble)
 library(ggeffects)
 library(ggplot2)
+  library(patchwork)
 })
 ### Prepare species-level dataset ####
 
@@ -231,7 +232,11 @@ make_species_plots <- function(species_models,
                                plots_dir,
                                analysis_date,
                                reef_cols,
-                               theme_clean) {
+                               theme_clean,
+                               fish_long_norm) {
+  
+  # canonical bin order from size_bins
+  bin_levels <- size_bins$Size_Class
   
   plot_list <- list()
   
@@ -243,7 +248,8 @@ make_species_plots <- function(species_models,
     
     message("Plotting species: ", sp_name)
     
-    # predictions with simple terms grid
+    ## 1) PREDICTED JUV / ADULT PANEL ########################################
+    
     pred_sp <- try(
       ggpredict(
         m_sp,
@@ -266,7 +272,6 @@ make_species_plots <- function(species_models,
       next
     }
     
-    # ensure CI columns exist
     if (!all(c("conf.low", "conf.high") %in% names(pred_sp))) {
       if ("std.error" %in% names(pred_sp)) {
         pred_sp <- pred_sp %>%
@@ -276,7 +281,6 @@ make_species_plots <- function(species_models,
           )
         message("  CI rebuilt from std.error for ", sp_name)
       } else {
-        message("  No CI info for ", sp_name, " plotting points only")
         pred_sp <- pred_sp %>%
           mutate(
             conf.low  = predicted,
@@ -285,14 +289,12 @@ make_species_plots <- function(species_models,
       }
     }
     
-    # tidy factor levels for nice axes
     pred_sp <- pred_sp %>%
       mutate(
         x     = factor(x,     levels = c("juvenile", "adult")),
         group = factor(group, levels = c("Natural", "Artificial"))
       )
     
-    # build plot
     p_sp <- ggplot(
       pred_sp,
       aes(x = x, y = predicted, color = group, fill = group, group = group)
@@ -314,27 +316,133 @@ make_species_plots <- function(species_models,
         x     = "Life stage",
         y     = "Predicted count per 100 m²",
         color = "Reef type",
-        fill  = "Reef type",
-        title = sp_name
+        fill  = "Reef type"
       ) +
-      theme(plot.title = element_text(face = "italic"))
+      theme(
+        plot.title       = element_text(face = "italic"),
+        strip.background = element_blank()
+      )
+    
+    ## 2) RAW SIZE STRUCTURE PANEL ###########################################
+    
+    size_tab <- fish_long_norm %>%
+      filter(Sci_Name == sp_name) %>%
+      group_by(Type, Size_Class) %>%
+      summarise(
+        total_n = sum(Count, na.rm = TRUE),
+        .groups = "drop"
+      )
+    
+    if (nrow(size_tab) == 0) {
+      message("  No size data for ", sp_name, " skipping size panel")
+      p_combined <- p_sp
+    } else {
+      
+      # canonical bin order from size_bins
+      bin_levels <- size_bins$Size_Class
+      
+      # join bin bounds, THEN enforce factor order
+      size_tab <- size_tab %>%
+        left_join(size_bins, by = "Size_Class") %>%
+        mutate(
+          Size_Class = factor(Size_Class, levels = bin_levels)
+        ) %>%
+        arrange(Type, Size_Class)
+      
+      # base histogram
+      p_hist <- ggplot(size_tab,
+                       aes(x = Size_Class, y = total_n, fill = Type)) +
+        geom_col(position = "dodge") +
+        scale_fill_manual(values = reef_cols) +
+        labs(
+          x = "Size class (cm)",
+          y = "Total count"
+        ) +
+        theme_clean +
+        theme(
+          axis.text.x     = element_text(angle = 45, hjust = 1),
+          legend.position = "none"
+        )
+      
+      # look up Lmat
+      Lmat_val <- maturity_lookup %>%
+        filter(Sci_Name == sp_name) %>%
+        pull(Lmat_cm)
+      
+      if (length(Lmat_val) == 1 && is.finite(Lmat_val)) {
+        
+        # bins object for Lmat logic, using same factor levels
+        bins <- size_bins %>%
+          mutate(
+            Size_Class   = factor(Size_Class, levels = bin_levels),
+            crosses_Lmat = lower < Lmat_val & upper > Lmat_val
+          )
+        
+        idx <- which(bins$crosses_Lmat)
+        if (length(idx) == 0) {
+          if (Lmat_val <= min(bins$lower)) {
+            idx <- 1L
+          } else {
+            idx <- nrow(bins)
+          }
+        }
+        
+        Lmat_bin <- bins$Size_Class[idx[1]]
+        x_pos    <- which(bin_levels == as.character(Lmat_bin))
+        y_max    <- max(size_tab$total_n, na.rm = TRUE)
+        
+        # label with actual size at maturity
+        Lmat_lab <- paste0("Lmat = ", round(Lmat_val, 1), " cm")
+        
+        p_hist <- p_hist +
+          geom_vline(
+            xintercept = x_pos,
+            linetype   = 2,
+            linewidth  = 0.6,
+            color      = "red"
+          ) +
+          annotate(
+            "text",
+            x     = x_pos + 1.0,
+            y     = y_max * 1.05,
+            label = Lmat_lab,
+            color = "red",
+            size  = 3,
+            vjust = 0
+          ) +
+          expand_limits(y = y_max * 1.1)
+      }
+      
+      ## 3) COMBINE PANELS (vertical) #######################################
+      p_combined <- (p_sp / p_hist) + # use / for above/below or + for side to side but much change 
+        plot_layout(heights = c(1.3, 1)) + # use for /
+        # plot_layout(widths = c(2, 1)) + # use for + 
+        plot_annotation(
+          title = sp_name,
+          theme = theme(plot.title = element_text(face = "italic"))
+        )
+    }
+    
     
     ggsave(
       filename = file.path(
         plots_dir,
         paste0("Fig_species_", safe_name, "_", analysis_date, ".png")
       ),
-      plot   = p_sp,
+      plot   = p_combined,
       width  = 7,
-      height = 4.5,
+      height = 6,
       dpi    = 300
     )
     
-    plot_list[[safe_name]] <- p_sp
+    plot_list[[safe_name]] <- p_combined
   }
   
   invisible(plot_list)
 }
+
+
+
 
 ### Restrict plots to good models and make plots ####
 
@@ -350,7 +458,8 @@ plots_species <- make_species_plots(
   plots_dir      = plots_dir,
   analysis_date  = analysis_date,
   reef_cols      = reef_cols,
-  theme_clean    = theme_clean
+  theme_clean    = theme_clean,
+  fish_long_norm = fish_long_norm
 )
 
 ## Optional check for a specific species
@@ -359,3 +468,85 @@ fish_species_ls %>%
    group_by(Type, life_stage, Pair) %>%
    summarise(n = sum(stage_Count), .groups = "drop") %>%
    pivot_wider(names_from = Pair, values_from = n, values_fill = 0)
+
+
+
+
+##### Movement of preds by time ########## 
+library(dplyr)
+library(ggplot2)
+library(patchwork)
+
+## 1) Define the predator subset from spp_lookup ####
+
+pred_spp <- spp_lookup %>%
+  filter(grepl("Snapper|Grouper|Sweetlips", Species))
+
+# Optional: check which species are included
+pred_spp
+# Snapper - Brownstripe / Mangrove / Russells
+# Grouper - Blacktip / Brown marbled / Coral groupers (all)
+# Sweetlips - Harlequin / Harry hotlips / Painted
+
+# 2) filter fish_long_norm by those species  #### 
+fish_pred <- fish_long_norm %>%
+  filter(
+    Species %in% pred_spp$Species,
+    !is.na(Date)
+  )
+
+
+## 3) Time series: predator abundance through time on wrecks #### 
+
+pred_time_df <- fish_pred %>%
+  filter(
+    Type == "Artificial",
+    !is.na(Date)
+  ) %>%
+  group_by(Pair, Site, Date) %>%
+  summarise(
+    total_pred = sum(Count_perSurvey, na.rm = TRUE),
+    .groups    = "drop"
+  )
+
+p_pred_time <- ggplot(pred_time_df,
+                      aes(x = Date, y = total_pred, color = Site, group = Site)) +
+  geom_line() +
+  geom_point() +
+  facet_wrap(~ Pair, scales = "free_y") +
+  labs(
+    x = "Date",
+    y = "Mean predator count per survey",
+    color = "Site"
+  ) +
+  theme_clean
+
+## 4) First-arrival dates for each predator species on each wreck ----------
+
+pred_arrivals <- fish_pred %>%
+  filter(
+    Type == "Artificial",
+    Count > 0,
+    !is.na(Date)
+  ) %>%
+  group_by(Pair, Site, Sci_Name, Species) %>%
+  summarise(
+    first_date = min(Date, na.rm = TRUE),
+    .groups    = "drop"
+  )
+
+p_arrivals <- ggplot(pred_arrivals,
+                     aes(x = first_date, y = Species, color = Site)) +
+  geom_point(size = 2) +
+  facet_wrap(~ Pair) +
+  labs(
+    x = "First detection date",
+    y = "Predator species",
+    color = "Site"
+  ) +
+  theme_clean
+
+## 5) Optional combined figure ---------------------------------------------
+
+p_pred_time / p_arrivals + plot_layout(heights = c(2, 1))
+

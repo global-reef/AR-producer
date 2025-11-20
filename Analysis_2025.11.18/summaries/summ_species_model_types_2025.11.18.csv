@@ -1,0 +1,6 @@
+"model_type","ok_for_plots","n_species"
+"Type x life_stage interaction",TRUE,10
+"Type x life_stage interaction",FALSE,8
+"Additive Type + life_stage",FALSE,3
+"Additive Type + life_stage",TRUE,2
+"Additive Type + life_stage (rare species model)",TRUE,2

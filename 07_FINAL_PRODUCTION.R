@@ -200,6 +200,58 @@ suppressPackageStartupMessages({
   library(tidyr)
 })
 
+### Species-level summaries ####################################################
+
+# Join diagnostics and model structures
+spp_model_diag <- model_diag %>%
+  rename(Sci_Name = species) %>%
+  left_join(species_diag, by = "Sci_Name") %>%
+  left_join(
+    candidate_species %>% select(Sci_Name, ok_candidate),
+    by = "Sci_Name"
+  )
+
+# 1) Overall counts
+summ_spp_overall <- tibble(
+  n_species_total      = n_distinct(species_diag$Sci_Name),
+  n_species_candidate  = sum(candidate_species$ok_candidate, na.rm = TRUE),
+  n_models_fitted      = nrow(model_diag),
+  n_models_ok_for_plots = sum(model_diag$ok_for_plots, na.rm = TRUE)
+)
+
+# 2) Model type breakdown
+summ_spp_model_types <- spp_model_diag %>%
+  count(model_type, ok_for_plots, name = "n_species") %>%
+  arrange(desc(n_species))
+
+# 3) Species-level data richness (for SI table)
+summ_spp_richness <- spp_model_diag %>%
+  arrange(desc(total_count)) %>%
+  select(
+    Sci_Name,
+    total_count,
+    n_rows,
+    n_Type,
+    n_stage,
+    n_Pair,
+    n_cells_nonzero,
+    model_type,
+    ok_candidate,
+    ok_for_plots
+  )
+
+# Write to disk
+write.csv(summ_spp_overall,
+          file.path(summ_dir, paste0("summ_species_overall_", analysis_date, ".csv")),
+          row.names = FALSE)
+
+write.csv(summ_spp_model_types,
+          file.path(summ_dir, paste0("summ_species_model_types_", analysis_date, ".csv")),
+          row.names = FALSE)
+
+write.csv(summ_spp_richness,
+          file.path(summ_dir, paste0("summ_species_richness_", analysis_date, ".csv")),
+          row.names = FALSE)
 
 
 

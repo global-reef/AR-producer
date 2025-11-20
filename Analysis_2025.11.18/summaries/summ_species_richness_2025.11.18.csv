@@ -1,0 +1,26 @@
+"Sci_Name","total_count","n_rows","n_Type","n_stage","n_Pair","n_cells_nonzero","model_type","ok_candidate","ok_for_plots"
+"Neopomacentrus cyanomos",16477,386,2,2,3,12,"Type x life_stage interaction",TRUE,TRUE
+"Caesio xanthonota",5831,111,2,2,3,10,"Type x life_stage interaction",TRUE,TRUE
+"Pomacentrus alexanderae",3945,179,2,2,3,12,"Type x life_stage interaction",TRUE,TRUE
+"Sphyraena flavicauda",2251,29,2,2,3,6,"Type x life_stage interaction",TRUE,TRUE
+"Lutjanus russellii",1940,151,2,2,3,10,"Type x life_stage interaction",TRUE,TRUE
+"Lutjanus vitta",1039,61,2,2,3,10,"Type x life_stage interaction",TRUE,FALSE
+"Lutjanus griseus",652,154,2,2,3,9,"Type x life_stage interaction",TRUE,TRUE
+"Scarus rivulatus",625,123,2,2,3,12,"Type x life_stage interaction",TRUE,TRUE
+"Thalassoma lunare",502,122,2,2,3,9,"Additive Type + life_stage",TRUE,TRUE
+"Plectropomus spp.",471,262,2,2,3,12,"Type x life_stage interaction",TRUE,FALSE
+"Siganus javus",407,138,2,2,3,11,"Type x life_stage interaction",TRUE,TRUE
+"Flavocaranx bajad",249,113,2,2,3,12,"Type x life_stage interaction",TRUE,TRUE
+"Ephippidae spp.",191,19,2,2,3,9,"Type x life_stage interaction",TRUE,FALSE
+"Epinephelus fasciatus",165,91,2,2,3,10,"Type x life_stage interaction",TRUE,TRUE
+"Heniochus acuminatus",159,86,2,2,3,12,"Type x life_stage interaction",TRUE,FALSE
+"Epinephelus fuscoguttatus",143,89,2,2,3,11,"Type x life_stage interaction",TRUE,FALSE
+"Chaetodon weibeli",130,81,2,2,3,11,"Type x life_stage interaction",TRUE,FALSE
+"Diagramma pictum",119,60,2,2,3,8,"Additive Type + life_stage",TRUE,TRUE
+"Labroides dimidiatus",90,50,2,2,3,8,"Additive Type + life_stage",TRUE,FALSE
+"Chaetodon octofasciatus",68,45,2,2,3,10,"Additive Type + life_stage",TRUE,FALSE
+"Turrum fulvoguttatum",65,33,2,2,3,9,"Additive Type + life_stage",TRUE,FALSE
+"Cheilinus fasciatus",60,40,2,2,3,11,"Type x life_stage interaction",TRUE,FALSE
+"Pomacanthus annularis",51,34,2,2,3,10,"Type x life_stage interaction",TRUE,FALSE
+"Ballistoides viridescens",45,15,2,2,2,4,"Additive Type + life_stage (rare species model)",TRUE,TRUE
+"Plectorhinchus gibbosus",43,23,2,2,3,8,"Additive Type + life_stage (rare species model)",TRUE,TRUE
