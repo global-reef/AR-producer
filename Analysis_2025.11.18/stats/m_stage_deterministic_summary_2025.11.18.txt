@@ -1,5 +1,6 @@
  Family: nbinom2  ( log )
-Formula:          Count ~ Type * life_stage + date_num + Pair + Count.Type + offset(log(Inclusion_m)) +  
+Formula:          
+Count ~ Type * life_stage + date_num + Pair + Count.Type + offset(log(Inclusion_m)) +  
     (1 | Site) + (1 | survey_id)
 Data: fish_long_life
 

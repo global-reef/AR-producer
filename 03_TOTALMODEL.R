@@ -44,6 +44,13 @@ capture.output(
   file = file.path(stats_dir, paste0("m1_size_structure_summary_", analysis_date, ".txt"))
 )
 
+emm_m1 <- emmeans(m1, ~ Type | Size_Class_f, offset = log(100))
+pairs(emm_m1)
+capture.output(
+  pairs(emm_m1),
+  file = file.path(stats_dir, paste0("m1_emm_summary_", analysis_date, ".txt"))
+)
+
 ## 3. Time model: do size distributions change over time? ################
 
 m_time <- glmmTMB(
@@ -288,6 +295,49 @@ make_totalfish_plots <- function(m1,
     dpi      = 300
   )
   
+  # make size classes an ordered factor so the line is smooth along x
+  pred_size <- pred_size %>%
+    mutate(
+      x = factor(
+        x,
+        levels = c("0-1","1-2","2-5","5-10","10-15","15-20","20-50","50-100","100+"),
+        ordered = TRUE
+      ),
+      group = factor(group, levels = c("Natural","Artificial"))
+    )
+  
+  p_size_pub <- ggplot(
+    pred_size,
+    aes(x = x, y = predicted, color = group, fill = group, group = group)
+  ) +
+    geom_ribbon(
+      aes(ymin = conf.low, ymax = conf.high),
+      alpha = 0.12,
+      color = NA
+    ) +
+    geom_line(linewidth = 1.1) +
+    geom_point(size = 2.6) +
+    scale_color_manual(values = reef_cols) +
+    scale_fill_manual(values = reef_cols) +
+    scale_y_continuous(expand = expansion(mult = c(0.05, 0.10))) +
+    theme_clean +
+    theme(
+      axis.text.x = element_text(angle = 35, hjust = 1)
+    ) +
+    labs(
+      x     = "Size class (cm)",
+      y     = "Predicted density per 100 m²",
+      color = "Reef type",
+      fill  = "Reef type"
+    )
+  
+  ggsave(
+    filename = file.path(plots_dir, paste0("Fig2_size_structure_pub", analysis_date, ".png")),
+    plot     = p_size_pub,
+    width    = 7,
+    height   = 4.5,
+    dpi      = 300
+  )
   
   # Figure 3. Time trend in total density by reef type
   pred_time <- ggpredict(
@@ -408,11 +458,11 @@ make_totalfish_plots <- function(m1,
     height   = 4.5,
     dpi      = 300
   )
-  
   # Return plots in case you want them in the console
   invisible(list(
     p_tot       = p_tot,
     p_size      = p_size,
+    p_size_pub = p_size_pub,
     p_time      = p_time,
     p_pair_det  = p_pair_det,
     p_pair_prob = p_pair_prob
@@ -433,3 +483,5 @@ plots_totalfish <- make_totalfish_plots(
 # can then inspect any plot interactively with e.g. plots_totalfish$p_pair_prob. 
 
 message("✅ Main models done! Plots and resules saved to to: ", output_dir)
+
+

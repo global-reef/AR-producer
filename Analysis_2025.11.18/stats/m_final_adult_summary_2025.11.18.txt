@@ -1,5 +1,6 @@
  Family: nbinom2  ( log )
-Formula:          adult ~ Type + Pair + date_num + offset(log(Inclusion_m)) + (1 |      Site) + (1 | survey_id)
+Formula:          adult ~ Type + Pair + date_num + offset(log(Inclusion_m)) + (1 |  
+    Site) + (1 | survey_id)
 Data: juv_adult_total
 
       AIC       BIC    logLik -2*log(L)  df.resid 

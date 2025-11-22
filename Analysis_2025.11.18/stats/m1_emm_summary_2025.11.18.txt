@@ -1,0 +1,38 @@
+Size_Class_f = 0-1:
+ contrast             estimate    SE  df z.ratio p.value
+ Natural - Artificial   -1.261 0.557 Inf  -2.262  0.0237
+
+Size_Class_f = 1-2:
+ contrast             estimate    SE  df z.ratio p.value
+ Natural - Artificial   -0.350 0.426 Inf  -0.822  0.4112
+
+Size_Class_f = 2-5:
+ contrast             estimate    SE  df z.ratio p.value
+ Natural - Artificial   -0.143 0.357 Inf  -0.400  0.6893
+
+Size_Class_f = 5-10:
+ contrast             estimate    SE  df z.ratio p.value
+ Natural - Artificial    0.152 0.282 Inf   0.540  0.5895
+
+Size_Class_f = 10-15:
+ contrast             estimate    SE  df z.ratio p.value
+ Natural - Artificial   -0.448 0.277 Inf  -1.618  0.1056
+
+Size_Class_f = 15-20:
+ contrast             estimate    SE  df z.ratio p.value
+ Natural - Artificial   -0.516 0.286 Inf  -1.803  0.0713
+
+Size_Class_f = 20-50:
+ contrast             estimate    SE  df z.ratio p.value
+ Natural - Artificial   -1.597 0.285 Inf  -5.604  <.0001
+
+Size_Class_f = 50-100:
+ contrast             estimate    SE  df z.ratio p.value
+ Natural - Artificial   -3.709 0.366 Inf -10.123  <.0001
+
+Size_Class_f = 100+:
+ contrast             estimate    SE  df z.ratio p.value
+ Natural - Artificial   -7.538 1.270 Inf  -5.959  <.0001
+
+Results are averaged over the levels of: Pair, Count.Type, Inclusion_m 
+Results are given on the log (not the response) scale. 

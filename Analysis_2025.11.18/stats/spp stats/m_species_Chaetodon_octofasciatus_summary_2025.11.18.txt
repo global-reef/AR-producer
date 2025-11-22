@@ -1,5 +1,7 @@
  Family: nbinom2  ( log )
-Formula:          stage_Count ~ Pair + life_stage + Type + date_num + offset(log(Inclusion_m)) +      (1 | Site) + (1 | survey_id)
+Formula:          
+stage_Count ~ Pair + life_stage + Type + date_num + offset(log(Inclusion_m)) +  
+    (1 | Site) + (1 | survey_id)
 Data: df_sp
 
       AIC       BIC    logLik -2*log(L)  df.resid 

@@ -1,5 +1,7 @@
  Family: nbinom2  ( log )
-Formula:          Count ~ Type * Size_Class_f + Pair + Count.Type + offset(log(Inclusion_m)) +      (1 | Site) + (1 | survey_id)
+Formula:          
+Count ~ Type * Size_Class_f + Pair + Count.Type + offset(log(Inclusion_m)) +  
+    (1 | Site) + (1 | survey_id)
 Zero inflation:         ~Type + Size_Class_f
 Data: fish_long
 

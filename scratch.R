@@ -339,3 +339,48 @@ ggplot(species_props, aes(x = reorder(Sci_Name, mean_prop_juv), y = mean_prop_ju
   ) +
   theme_minimal(base_size = 14)
 
+
+##### 
+library(dplyr)
+
+# Distinct size-structure surveys
+size_surveys <- fish_long_norm %>%
+  distinct(survey_id, Site, Pair, Type, Date)
+
+size_surveys %>% count()       # <N_size_surveys>
+
+# Number of species with size-structured data
+fish_long_norm %>%
+  distinct(Sci_Name) %>%
+  nrow()                       # <N_species_size>
+
+
+# Distinct abundance surveys
+abund_surveys <- fish_long %>%
+  distinct(survey_id, site, pair, type, Date)
+
+# Total surveys and by type
+abund_surveys %>% count()                      # <N_abund_surveys>
+abund_surveys %>% count(type)                 # <N_abund_AR>, <N_abund_NR>
+abund_surveys %>% count(pair)                 # <N_AowMao>, <N_NoName>, <N_Sattakut>
+
+# Date range
+abund_surveys %>%
+  summarise(
+    start_date = min(Date, na.rm = TRUE),
+    end_date   = max(Date, na.rm = TRUE)
+  )
+
+
+# Location: file.path(summ_dir, paste0("summ_species_overall_", analysis_date, ".csv"))
+# If you are not sure about the date, inspect the directory:
+list.files(summ_dir, pattern = "summ_species_overall_")
+
+summ_spp_overall <- readr::read_csv(
+  file.path(summ_dir, "summ_species_overall_2025.11.18.csv")
+)
+
+summ_spp_overall
+
+
+
