@@ -4,7 +4,7 @@ maturity_lookup <- tibble::tribble(
   # ----- GROUPERS / SNAPPERS / EMPERORS -----
   "Epinephelus fasciatus",        52,       39.1,     "fishbase",       "Estimated from Linf",
   "Epinephelus fuscoguttatus",    120,      51.8,     "fishbase",       "Estimated from Linf",
-  "Lutjanus griseus",             89,       32.1,     "fishbase",       "Estimated from Linf",
+  "Lutjanus argentimaculatus",    150,      57,       "fishbase",       "Estimated from Linf",
   "Lutjanus russellii",           50,       29,       "fishbase",       "Estimated from Linf",
   "Lutjanus vitta",               25.5,     15.3,     "fishbase",       "Estimated from Linf",
   "Plectorhinchus chaetodonoides",72,       47.4,     "fishbase",       "Estimated from Linf",

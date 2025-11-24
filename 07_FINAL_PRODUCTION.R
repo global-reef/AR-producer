@@ -7,6 +7,7 @@ library(ggeffects)
 library(ggplot2)
 library(emmeans)
 library(tidyr)
+library(ggeffects)
 })
 message("### Starting final production summary ###")
 
@@ -65,6 +66,18 @@ capture.output(summary(m_juv),
                file = file.path(stats_dir, paste0("m_final_juv_summary_", analysis_date, ".txt")))
 capture.output(summary(m_adult),
                file = file.path(stats_dir,paste0("m_final_adult_summary_",analysis_date, ".txt")))
+
+summary(m_juv)
+summary(m_adult)
+# finding \Beta values for m_juv and m_adult 
+coefs_juv <- summary(m_final_juv)$coefficients$cond
+coefs_adult <- summary(m_final_adult)$coefficients$cond
+
+beta_type_juv   <- coefs_juv["TypeArtificial", c("Estimate","Std. Error","Pr(>|z|)")]
+beta_type_adult <- coefs_adult["TypeArtificial", c("Estimate","Std. Error","Pr(>|z|)")]
+
+print(beta_type_juv)
+print(beta_type_adult)
 
 
 ### 3. Contrasts: AR vs NR for juveniles and adults ###
@@ -136,10 +149,71 @@ ggsave(
 
 library(patchwork)
 
-p_combine <- p_juv + p_adult
+# Remove legend from juveniles, keep on adults
+p_juv_ls <- p_juv +
+  labs(y = "Juvenile density (per 100 m2)") +
+  theme(legend.position = "none")
+
+p_adult_ls <- p_adult +
+  labs(y = "Adult density (per 100 m2)") +
+  theme(legend.position = "right")   # or "bottom" if you prefer
+
+# Combine with patchwork
+p_combine <- p_juv_ls + p_adult_ls +
+  plot_layout(guides = "keep")  # ensure legend from adult is kept
+
+p_combine 
+
 ggsave(
   file.path(plots_dir, paste0("FIG_99_Final_combined_density_", analysis_date, ".png")),
-  p_combine, width = 6, height = 4.2, dpi = 300
+  p_combine, width = 7.5, height = 4.2, dpi = 300
+)
+
+# proper combined plot 
+### 4. Prediction plots for clean inference ###
+
+# Juveniles
+pred_juv <- ggpredict(
+  m_juv,
+  terms     = "Type",
+  condition = list(Inclusion_m = 100)
+) %>%
+  as.data.frame() %>%
+  mutate(life_stage = "Juvenile")
+
+# Adults
+pred_adult <- ggpredict(
+  m_adult,
+  terms     = "Type",
+  condition = list(Inclusion_m = 100)
+) %>%
+  as.data.frame() %>%
+  mutate(life_stage = "Adult")
+
+# Combine and facet
+pred_all <- bind_rows(pred_juv, pred_adult)
+
+p_density_ls <- ggplot(pred_all,
+                       aes(x = x, y = predicted, color = x)) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high),
+                width = 0.15) +
+  facet_wrap(~ life_stage, nrow = 1) +
+  scale_color_manual(values = reef_cols) +
+  theme_clean +
+  labs(
+    x     = "Reef type",
+    y     = "Density (per 100 m2)",
+    color = "Type"
+  )
+
+ggsave(
+  file.path(plots_dir,
+            paste0("FIG_SX_Final_density_lifestage_", analysis_date, ".png")),
+  p_density_ls,
+  width  = 6,
+  height = 4.2,
+  dpi    = 300
 )
 
 

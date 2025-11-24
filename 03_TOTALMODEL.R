@@ -480,7 +480,20 @@ plots_totalfish <- make_totalfish_plots(
   reef_cols     = reef_cols,
   theme_clean   = theme_clean
 )
-# can then inspect any plot interactively with e.g. plots_totalfish$p_pair_prob. 
+# can then inspect any plot interactively with e.g. plots_totalfish$p_pair_prob.
+
+
+
+
+em_ls_pair <- emmeans(
+  m_stage_prob,
+  ~ Type | life_stage * Pair,
+  offset = log(100)
+)
+
+ct_ls_pair <- as.data.frame(contrast(em_ls_pair, method = "revpairwise"))
+
+ct_ls_pair
 
 message("✅ Main models done! Plots and resules saved to to: ", output_dir)
 

@@ -40,3 +40,4 @@ TypeArtificial:life_stageadult:fgroupMesopredator -0.21962    0.60137  -0.365 0.
 TypeArtificial:life_stageadult:fgroupHTLP          2.03579    0.51480   3.955 7.67e-05 ***
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+

@@ -129,186 +129,6 @@ bbfish <- brm(
 
 summary(bbfish)
 
-#### extract effects 
-
-library(brms)
-library(dplyr)
-library(ggplot2)
-
-# Extract random slopes for Site_TypeWreck grouped by species
-species_slopes <- ranef(bbfish)$Sci_Name[, , "Site_TypeWreck"] %>%
-  as.data.frame() %>%
-  tibble::rownames_to_column("Species") %>%
-  rename(
-    estimate = Estimate,
-    lower = Q2.5,
-    upper = Q97.5
-  )
-species_slopes <- species_slopes %>%
-  arrange(estimate) %>%
-  mutate(Species = factor(Species, levels = Species))
-ggplot(species_slopes, aes(x = estimate, y = Species)) +
-  geom_point() +
-  geom_errorbarh(aes(xmin = lower, xmax = upper), height = 0.3) +
-  geom_vline(xintercept = 0, linetype = "dashed") +
-  labs(
-    x = "Effect of Wreck on Juvenile Proportion (log-odds)",
-    y = "Species",
-    title = "Species-specific juvenile/adult slope by Site Type"
-  ) +
-  theme_minimal()
-
-
-
-
-# Summarise total counts per species
-library(dplyr)
-
-species_counts <- fish_model %>%
-  group_by(Sci_Name) %>%
-  summarise(total_individuals = sum(total_count, na.rm = TRUE),
-            n_surveys = n()) %>%
-  arrange(desc(total_individuals))
-
-# View top and bottom
-print(species_counts, n=30)
-
-# Filter for species with > X total individuals (e.g., 50 as a working threshold)
-well_sampled_species <- species_counts %>%
-  filter(total_individuals >= 50) %>%
-  pull(Sci_Name)
-
-# Subset the main data for only those species
-fish_model_filtered <- fish_model %>%
-  filter(Sci_Name %in% well_sampled_species)
-
-
-
-# Assign group based on Inclusion_m and Count.Type
-fish_model_filtered <- fish_model_filtered %>%
-  mutate(
-    Ecological_Group = case_when(
-      Inclusion_m == 1 ~ "Small Reef Fish",
-      Inclusion_m == 5 & Count.Type == "Stationary" ~ "Mid-size Invertivores",
-      Inclusion_m == 5 & Count.Type == "Belt" ~ "Large Predators",
-      TRUE ~ NA_character_
-    )
-  )
-table(fish_model_filtered$Ecological_Group, useNA = "ifany")
-
-
-long_fish <- fish_model_filtered %>%
-  pivot_longer(cols = starts_with("bin_"), names_to = "Size_Class", values_to = "Count") %>%
-  mutate(
-    Size_Min = as.numeric(str_extract(Size_Class, "(?<=bin_)[0-9]+")),
-    Size_Max = as.numeric(str_extract(Size_Class, "(?<=_)[0-9]+|(?<=plus).*")) %>% 
-      replace_na(120),
-    Midpoint_cm = (Size_Min + Size_Max) / 2
-  ) %>%
-  left_join(lookup, by = c("Sci_Name" = "Original_Name")) %>%
-  mutate(Maturity = case_when(
-    Midpoint_cm < Lmat_cm ~ "juvenile",
-    Midpoint_cm >= Lmat_cm ~ "adult",
-    TRUE ~ NA_character_
-  )) %>%
-  filter(!is.na(Maturity))
-
-
-survey_summary <- long_fish %>%
-  group_by(Site, Site_Type, Date_mm.dd.yy, Researchers, Sci_Name, Ecological_Group, Maturity) %>%
-  summarise(n = sum(Count, na.rm = TRUE), .groups = "drop") %>%
-  pivot_wider(
-    names_from = Maturity,
-    values_from = n,
-    values_fill = 0
-  ) %>%
-  mutate(total = juvenile + adult)
-
-# fit with new interaction 
-brm_ecogroup <- brm(
-  juvenile | trials(total) ~ Site_Type  * Ecological_Group + (1 | Sci_Name) + (1 | Site),
-  data = survey_summary,
-  family = binomial(),
-  chains = 4, cores = 4, iter = 2000
-)
-
-# or 
-split_data <- survey_summary %>%
-  group_split(Ecological_Group)
-
-
-
-summary(brm_ecogroup)
-# Extract random slopes for Site_TypeWreck grouped by species
-species_slopes <- ranef(brm_ecogroup)$Sci_Name[, , "Site_TypeWreck"] %>%
-  as.data.frame() %>%
-  tibble::rownames_to_column("Species") %>%
-  rename(
-    estimate = Estimate,
-    lower = Q2.5,
-    upper = Q97.5
-  )
-species_slopes <- species_slopes %>%
-  arrange(estimate) %>%
-  mutate(Species = factor(Species, levels = Species))
-ggplot(species_slopes, aes(x = estimate, y = Species)) +
-  geom_point() +
-  geom_errorbarh(aes(xmin = lower, xmax = upper), height = 0.3) +
-  geom_vline(xintercept = 0, linetype = "dashed") +
-  labs(
-    x = "Effect of Wreck on Juvenile Proportion (log-odds)",
-    y = "Species",
-    title = "Species-specific juvenile/adult slope by Site Type"
-  ) +
-  theme_minimal()
-
-
-split_data <- survey_summary %>%
-  group_split(Ecological_Group)
-
-
-
-# Fit a separate model per group (you can loop this if you like) 
-model_small <- brm(
-  juvenile | trials(total) ~ Site_Type,
-  data = split_data[[1]], 
-  iter = 4000, chains =4, cores = 4, backend = "cmdstanr", control = list(adapt_delta = 0.95), 
-  prior = prior,
-  family = binomial()
-)
-
-summary(model_small)
-
-
-data_mid <- split_data[[2]] %>% filter(total > 0)
-
-model_mid <- brm(
-  juvenile | trials(total) ~ Site_Type,
-  data = data_mid,
-  family = binomial(),
-  control = list(adapt_delta = 0.95)
-)
-summary(model_mid)
-
-
-
-data_big <- split_data[[3]] %>% filter(total > 0)
-
-prior <- c(
-  prior(normal(0, 5), class = "b"),
-  prior(normal(0, 5), class = "Intercept")
-)
-
-model_big <- brm(
-  juvenile | trials(total) ~ Site_Type,
-  data = data_big,
-  family = binomial(),
-  prior = prior,
-  control = list(adapt_delta = 0.99)
-)
-summary(model_big)
-plot(model_big)
-
 
 
 library(dplyr)
@@ -381,6 +201,16 @@ summ_spp_overall <- readr::read_csv(
 )
 
 summ_spp_overall
+
+# finding \Beta values for m_juv and m_adult 
+coefs_juv <- summary(m_final_juv)$coefficients$cond
+coefs_adult <- summary(m_final_adult)$coefficients$cond
+
+beta_type_juv   <- coefs_juv["TypeArtificial", c("Estimate","Std. Error","Pr(>|z|)")]
+beta_type_adult <- coefs_adult["TypeArtificial", c("Estimate","Std. Error","Pr(>|z|)")]
+
+print(beta_type_juv)
+print(beta_type_adult)
 
 
 

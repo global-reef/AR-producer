@@ -3,7 +3,7 @@
 library(ggplot2)
 
 # Enter the date for this analysis
-analysis_date <- "2025.11.18"  # update each run !!
+analysis_date <- "2025.11.24"  # update each run !!
 # File path (automatically join folder + date + filename)
 file_path <- paste0(
   "~/Documents/1_GLOBAL REEF/0_PROJECTS/AR_Producer_Attractor/AR_Producer/DATA/2025.11.13_FishSize_MASTER.csv"

@@ -1,0 +1,32 @@
+ Family: nbinom2  ( log )
+Formula:          Count ~ Type * life_stage + date_num + Pair + Count.Type + offset(log(Inclusion_m)) +  
+    (1 | Site) + (1 | survey_id)
+Data: fish_long_life
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+  29335.8   29446.9  -14654.9   29309.8     37997 
+
+Random effects:
+
+Conditional model:
+ Groups    Name        Variance  Std.Dev. 
+ Site      (Intercept) 4.277e-08 0.0002068
+ survey_id (Intercept) 6.889e-01 0.8300042
+Number of obs: 38010, groups:  Site, 6; survey_id, 164
+
+Dispersion parameter for nbinom2 family (): 0.0186 
+
+Conditional model:
+                                 Estimate Std. Error z value Pr(>|z|)    
+(Intercept)                    -4.8641680  0.3554600 -13.684  < 2e-16 ***
+TypeArtificial                  0.2620328  0.1728155   1.516   0.1295    
+life_stagemixed                 1.8767230  0.2105464   8.914  < 2e-16 ***
+life_stageadult                -1.8600934  0.2172631  -8.561  < 2e-16 ***
+date_num                        0.0004169  0.0006630   0.629   0.5295    
+PairNo Name                     0.0191898  0.1884127   0.102   0.9189    
+PairSattakut                    0.9256160  0.2118892   4.368 1.25e-05 ***
+Count.TypeStationary            4.5268266  0.1690722  26.775  < 2e-16 ***
+TypeArtificial:life_stagemixed  0.5982529  0.2886139   2.073   0.0382 *  
+TypeArtificial:life_stageadult  3.0153510  0.2812234  10.722  < 2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1

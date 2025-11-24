@@ -1,0 +1,42 @@
+ Family: nbinom2  ( log )
+Formula:          stage_Count ~ Type * life_stage * fgroup + Pair + date_s + Count.Type +  
+    offset(log(Inclusion_m)) + (1 | Site) + (1 | survey_id)
+Data: fish_fg_ls
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+   5502.8    5600.1   -2729.4    5458.8       594 
+
+Random effects:
+
+Conditional model:
+ Groups    Name        Variance  Std.Dev. 
+ Site      (Intercept) 9.561e-09 9.778e-05
+ survey_id (Intercept) 2.608e-01 5.107e-01
+Number of obs: 616, groups:  Site, 6; survey_id, 163
+
+Dispersion parameter for nbinom2 family (): 0.737 
+
+Conditional model:
+                                                  Estimate Std. Error z value Pr(>|z|)    
+(Intercept)                                        4.26535    0.19144  22.281  < 2e-16 ***
+TypeArtificial                                     0.40013    0.22791   1.756 0.079147 .  
+life_stageadult                                   -2.61457    0.21400 -12.217  < 2e-16 ***
+fgroupInvertivore                                 -3.30738    0.25173 -13.139  < 2e-16 ***
+fgroupMesopredator                                -2.76263    0.38341  -7.205 5.79e-13 ***
+fgroupHTLP                                        -3.63983    0.27664 -13.158  < 2e-16 ***
+PairNo Name                                        0.15073    0.16148   0.933 0.350583    
+PairSattakut                                       0.48014    0.17377   2.763 0.005727 ** 
+date_s                                             0.06104    0.06496   0.940 0.347377    
+Count.TypeStationary                                    NA         NA      NA       NA    
+TypeArtificial:life_stageadult                    -0.32726    0.30345  -1.078 0.280821    
+TypeArtificial:fgroupInvertivore                  -1.46126    0.40042  -3.649 0.000263 ***
+TypeArtificial:fgroupMesopredator                 -0.44626    0.48070  -0.928 0.353218    
+TypeArtificial:fgroupHTLP                         -0.21831    0.37722  -0.579 0.562773    
+life_stageadult:fgroupInvertivore                  0.65508    0.44870   1.460 0.144300    
+life_stageadult:fgroupMesopredator                 3.62882    0.46404   7.820 5.28e-15 ***
+life_stageadult:fgroupHTLP                         1.60281    0.38271   4.188 2.81e-05 ***
+TypeArtificial:life_stageadult:fgroupInvertivore   1.75637    0.68539   2.563 0.010390 *  
+TypeArtificial:life_stageadult:fgroupMesopredator -0.22260    0.60049  -0.371 0.710866    
+TypeArtificial:life_stageadult:fgroupHTLP          1.58639    0.51419   3.085 0.002034 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1

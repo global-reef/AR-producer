@@ -71,6 +71,10 @@ make_fg_stage_plots <- function(m_fg_stage,
     terms     = c("life_stage", "Type", "fgroup"),
     condition = c(Inclusion_m = 100)   # 100 m²
   ) %>% as.data.frame()
+  capture.output(
+    summary(pred_fg_ls),
+    file = file.path(stats_dir, paste0("pred_fg_ls", analysis_date, ".txt"))
+  )
   
   p_fg_stage <- ggplot(
     pred_fg_ls,

@@ -1,0 +1,36 @@
+ Family: nbinom2  ( log )
+Formula:          stage_Count ~ Type * life_stage * Pair + date_num + Count.Type +  
+    offset(log(Inclusion_m)) + (1 | Site) + (1 | survey_id)
+Data: fish_long_life_prob
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+  17318.8   17418.0   -8642.4   17284.8      2523 
+
+Random effects:
+
+Conditional model:
+ Groups    Name        Variance  Std.Dev. 
+ Site      (Intercept) 6.946e-09 8.334e-05
+ survey_id (Intercept) 4.376e-01 6.615e-01
+Number of obs: 2540, groups:  Site, 6; survey_id, 163
+
+Dispersion parameter for nbinom2 family (): 0.487 
+
+Conditional model:
+                                              Estimate Std. Error z value Pr(>|z|)    
+(Intercept)                                 -1.0291193  0.3017421  -3.411 0.000648 ***
+TypeArtificial                               0.8598735  0.2333350   3.685 0.000229 ***
+life_stageadult                             -0.5286508  0.2171530  -2.434 0.014914 *  
+PairNo Name                                  0.3622521  0.2441642   1.484 0.137904    
+PairSattakut                                 0.8246968  0.2460704   3.351 0.000804 ***
+date_num                                     0.0009342  0.0005201   1.796 0.072468 .  
+Count.TypeStationary                         2.4905418  0.1346225  18.500  < 2e-16 ***
+TypeArtificial:life_stageadult               0.4024020  0.2782681   1.446 0.148151    
+TypeArtificial:PairNo Name                  -0.4930520  0.3243253  -1.520 0.128451    
+TypeArtificial:PairSattakut                 -0.4223901  0.3565333  -1.185 0.236130    
+life_stageadult:PairNo Name                 -0.7542234  0.2803465  -2.690 0.007138 ** 
+life_stageadult:PairSattakut                 0.4666791  0.2835357   1.646 0.099779 .  
+TypeArtificial:life_stageadult:PairNo Name   0.1457614  0.3758539   0.388 0.698154    
+TypeArtificial:life_stageadult:PairSattakut -0.7487944  0.3951217  -1.895 0.058079 .  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1

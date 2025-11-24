@@ -1,0 +1,26 @@
+ Family: nbinom2  ( log )
+Formula:          juv ~ Type + Pair + date_num + offset(log(Inclusion_m)) + (1 |      Site) + (1 | survey_id)
+Data: juv_adult_total
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+   2896.7    2924.5   -1440.3    2880.7       230 
+
+Random effects:
+
+Conditional model:
+ Groups    Name        Variance  Std.Dev. 
+ Site      (Intercept) 6.709e-09 8.191e-05
+ survey_id (Intercept) 4.953e-01 7.038e-01
+Number of obs: 238, groups:  Site, 6; survey_id, 163
+
+Dispersion parameter for nbinom2 family (): 0.445 
+
+Conditional model:
+                Estimate Std. Error z value Pr(>|z|)    
+(Intercept)    3.7694370  0.5572601   6.764 1.34e-11 ***
+TypeArtificial 0.2839907  0.2618412   1.085    0.278    
+PairNo Name    0.0859816  0.3030511   0.284    0.777    
+PairSattakut   0.3103345  0.3401229   0.912    0.362    
+date_num       0.0002546  0.0010616   0.240    0.810    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1

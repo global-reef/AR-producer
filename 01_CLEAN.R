@@ -155,7 +155,8 @@ clean_fish_size <- function(file_path, output_dir) {
     "Ephinphelus fasciatus"     = "Epinephelus fasciatus",
     "Gnanthanodon speciosus"    = "Gnathanodon speciosus",
     "Siganus Virgatus"          = "Siganus virgatus",
-    "Epiphelus spp."            = "Ephippidae spp."
+    "Epiphelus spp."            = "Ephippidae spp.",
+    "Lutjanus griseus"          = "Lutjanus argentimaculatus"
   )
   
   # Apply recodes, then drop the invalid Epiphelus spp.

@@ -1,0 +1,7 @@
+        x       predicted          std.error         conf.low         conf.high               group            facet  
+ juvenile:8   Min.   :   36.68   Min.   :0.1789   Min.   :  17.98   Min.   :   74.82   Natural   :8   Grazer      :4  
+ adult   :8   1st Qu.:  162.49   1st Qu.:0.2172   1st Qu.:  99.09   1st Qu.:  267.04   Artificial:8   Invertivore :4  
+              Median :  357.57   Median :0.2489   Median : 201.91   Median :  579.80                  Mesopredator:4  
+              Mean   : 1424.65   Mean   :0.2693   Mean   : 958.18   Mean   : 2136.95                  HTLP        :4  
+              3rd Qu.:  590.15   3rd Qu.:0.3195   3rd Qu.: 384.14   3rd Qu.:  972.42                                  
+              Max.   :10605.39   Max.   :0.4101   Max.   :7468.32   Max.   :15060.18                                  

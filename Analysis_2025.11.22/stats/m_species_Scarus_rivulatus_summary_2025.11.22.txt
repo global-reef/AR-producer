@@ -1,0 +1,29 @@
+ Family: nbinom2  ( log )
+Formula:          stage_Count ~ Type:life_stage + Pair + life_stage + Type + date_num +  
+    offset(log(Inclusion_m)) + (1 | Site) + (1 | survey_id)
+Data: df_sp
+
+      AIC       BIC    logLik -2*log(L)  df.resid 
+    575.8     603.9    -277.9     555.8       113 
+
+Random effects:
+
+Conditional model:
+ Groups    Name        Variance  Std.Dev. 
+ Site      (Intercept) 1.711e-09 4.137e-05
+ survey_id (Intercept) 1.519e-01 3.897e-01
+Number of obs: 123, groups:  Site, 6; survey_id, 54
+
+Dispersion parameter for nbinom2 family (): 3.48 
+
+Conditional model:
+                                 Estimate Std. Error z value Pr(>|z|)    
+(Intercept)                     1.1717802  0.3800772   3.083  0.00205 ** 
+PairNo Name                    -0.5275385  0.2455464  -2.148  0.03168 *  
+PairSattakut                   -0.4484357  0.2796948  -1.603  0.10887    
+life_stageadult                 0.4623562  0.2233138   2.070  0.03841 *  
+TypeArtificial                  0.5026501  0.2561542   1.962  0.04973 *  
+date_num                       -0.0046922  0.0007238  -6.482 9.04e-11 ***
+TypeArtificial:life_stageadult -0.6631894  0.3775186  -1.757  0.07897 .  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1

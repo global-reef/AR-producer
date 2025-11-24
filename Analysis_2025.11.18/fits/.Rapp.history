@@ -1,0 +1,2 @@
+load("/Users/scarletttaylor/Documents/1_GLOBAL REEF/0_PROJECTS/AR_Producer_Attractor/AR_Producer/Analysis_2025.11.18/fits/m_final_adult_2025.11.18.rds")
+load("/Users/scarletttaylor/Documents/1_GLOBAL REEF/0_PROJECTS/AR_Producer_Attractor/AR_Producer/Analysis_2025.11.18/fits/m_final_juv_2025.11.18.rds")
