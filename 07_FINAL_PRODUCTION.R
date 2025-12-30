@@ -1,4 +1,8 @@
 ### 07_FINAL_PRODUCTION_SUMM.R ###
+
+
+###################### not used in final manuscript ########################
+
 ### Final producer vs attractor inference ###
 suppressPackageStartupMessages({
 library(dplyr)

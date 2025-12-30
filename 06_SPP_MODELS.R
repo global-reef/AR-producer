@@ -12,7 +12,7 @@ library(ggplot2)
 })
 ### Prepare species-level dataset ####
 
-# We use the probabilistic life stage data to keep the juvenile vs adult counts
+# use the probabilistic life stage data to keep the juvenile vs adult counts
 fish_species_ls <- fish_long_life_prob %>%
   # keep only species with non missing life stage counts
   filter(stage_Count > 0) %>%

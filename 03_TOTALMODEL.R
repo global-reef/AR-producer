@@ -1,16 +1,19 @@
-## Total density, size structure, life stage #############################################
+### Total density, size structure, life stage #################################
 
+### Libraries ##################################################################
 
-## Libraries #############################################
 suppressPackageStartupMessages({
   library(glmmTMB)
   library(dplyr)
   library(stringr)
   library(tibble)
+  library(tidyr)
   library(ggeffects)
   library(ggplot2)
+  library(emmeans)
 })
-## 1. Add time variables and clean size factor ################
+
+### 1) Add time variables and clean size factor ################################
 
 origin_date <- min(fish_long$Date, na.rm = TRUE)
 
@@ -21,88 +24,16 @@ fish_long <- fish_long %>%
     date_s       = as.numeric(scale(date_num, center = TRUE, scale = TRUE))
   )
 
-## 2. Main Model: size structure by reef type ################
+### 2) Life-stage preprocessing (deterministic + probabilistic) #################
 
-# “Are size distributions different on artificial vs natural reefs, within pairs, across all months pooled?”
-
-m1 <- glmmTMB(
-  Count ~ Type * Size_Class_f +
-    Pair +
-    Count.Type +
-    offset(log(Inclusion_m)) +
-    (1 | Site) +
-    (1 | survey_id),
-  ziformula = ~ Type + Size_Class_f,   # zero part by reef type and size class
-  family    = nbinom2,
-  data      = fish_long
-)
-
-# Save model and summary
-saveRDS(m1, file.path(fits_dir, paste0("m1_size_structure_", analysis_date, ".rds")))
-capture.output(
-  summary(m1),
-  file = file.path(stats_dir, paste0("m1_size_structure_summary_", analysis_date, ".txt"))
-)
-# save some key tables
-model_export(
-  model       = m1,
-  model_name  = "S5_sizestruct_P",
-  output_dir  = results_dir
-)
-
-emm_m1 <- emmeans(m1, ~ Type | Size_Class_f, offset = log(100))
-pairs(emm_m1)
-capture.output(
-  pairs(emm_m1),
-  file = file.path(stats_dir, paste0("m1_emm_summary_", analysis_date, ".txt"))
-)
-
-## 3. Time model: do size distributions change over time? ################
-
-m_time <- glmmTMB(
-  Count ~ Type * Size_Class_f +           # size structure by reef type
-    Type * date_s +                       # time trend differs by reef type
-    Size_Class_f * date_s +               # time trend differs by size class
-    Pair +
-    Count.Type +
-    offset(log(Inclusion_m)) +
-    (1 | Site) +
-    (1 | survey_id),
-  ziformula = ~ Type + Size_Class_f,      # simpler zero model, no time in zero part
-  family    = nbinom2,
-  data      = fish_long
-)
-
-saveRDS(m_time, file.path(fits_dir, paste0("m_time_size_time_", analysis_date, ".rds")))
-capture.output(
-  summary(m_time),
-  file = file.path(stats_dir, paste0("m_time_size_time_summary_", analysis_date, ".txt"))
-)
-
-# save some key tables
-model_export(
-  model       = m_time,
-  model_name  = "S6_m_time_P",
-  output_dir  = results_dir
-)
-# Optional: site random effects check (interactive, not saved)
-# ranef(m_time)$cond$Site
-
-
-## 4. SUPPLEMENTARY: deterministic life-stage model (with mixed) ################
-
-# This section is kept for robustness checks / supplement only
-
-# Species table (used by maturity lookup script)
 spp_tbl <- fish_size %>%
   distinct(Sci_Name) %>%
   mutate(
     Sci_Name = as.character(Sci_Name),
-    genus    = word(Sci_Name, 1),
-    species  = word(Sci_Name, 2)
+    genus    = stringr::word(Sci_Name, 1),
+    species  = stringr::word(Sci_Name, 2)
   )
 
-# Maturity lookup
 source("~/Documents/1_GLOBAL REEF/0_PROJECTS/AR_Producer_Attractor/AR_Producer/02.1_matlookup.R")
 
 size_bins <- tibble::tribble(
@@ -123,101 +54,46 @@ fish_long_life <- fish_long %>%
   left_join(size_bins,       by = "Size_Class") %>%
   mutate(
     life_stage = case_when(
-      is.na(Lmat_cm) ~ NA_character_,
-      upper   < Lmat_cm ~ "juvenile",     # whole bin below Lmat
-      lower   >= Lmat_cm ~ "adult",       # whole bin above Lmat
-      TRUE             ~ "mixed"          # bin crosses Lmat
+      is.na(Lmat_cm)       ~ NA_character_,
+      upper   <  Lmat_cm   ~ "juvenile",
+      lower   >= Lmat_cm   ~ "adult",
+      TRUE                 ~ "mixed"
     ),
-    life_stage = factor(
-      life_stage,
-      levels = c("juvenile", "mixed", "adult")
-    )
+    life_stage = factor(life_stage, levels = c("juvenile", "mixed", "adult"))
   )
 
-# Deterministic life stage model (main effect of life_stage)
-m_stage <- glmmTMB(
-  Count ~ Type * life_stage +
-    date_num + Pair +
-    Count.Type +
-    offset(log(Inclusion_m)) +
-    (1 | Site) +
-    (1 | survey_id),
-  family = nbinom2,
-  data   = fish_long_life
-)
-
-saveRDS(m_stage, file.path(fits_dir, paste0("m_stage_deterministic_", analysis_date, ".rds")))
-capture.output(
-  summary(m_stage),
-  file = file.path(stats_dir, paste0("m_stage_deterministic_summary_", analysis_date, ".txt"))
-)
-
-# save some key tables
-model_export(
-  model       = m_stage,
-  model_name  = "S99_DeterministicLS_P",
-  output_dir  = results_dir
-)
-# With Pair interaction (supplementary final deterministic model)
-m_stage_fx <- glmmTMB(
-  Count ~ Type * life_stage * Pair +
-    date_num +
-    Count.Type +
-    offset(log(Inclusion_m)) +
-    (1 | Site) +
-    (1 | survey_id),
-  family = nbinom2,
-  data   = fish_long_life
-)
-
-saveRDS(m_stage_fx, file.path(fits_dir, paste0("m_stage_deterministic_pair_", analysis_date, ".rds")))
-capture.output(
-  summary(m_stage_fx),
-  file = file.path(stats_dir, paste0("m_stage_deterministic_pair_summary_", analysis_date, ".txt"))
-)
-
-
-## 5. MAIN: probabilistic life stage model (juvenile vs adult) ################
-
-# Re-use size_bins from above and fish_long with date_num already added
-
 fish_long_prob <- fish_long %>%
-  left_join(maturity_lookup, by = "Sci_Name") %>%   # has Lmat_cm
+  left_join(maturity_lookup, by = "Sci_Name") %>%
   left_join(size_bins,       by = "Size_Class") %>%
   mutate(
-    # probability that a random fish in the bin is juvenile
     p_juv = case_when(
-      is.na(Lmat_cm)   ~ NA_real_,
-      upper <= Lmat_cm ~ 1,  # whole bin below Lmat
-      lower >= Lmat_cm ~ 0,  # whole bin above Lmat
-      TRUE             ~ (Lmat_cm - lower) / (upper - lower)
+      is.na(Lmat_cm)    ~ NA_real_,
+      upper <= Lmat_cm  ~ 1,
+      lower >= Lmat_cm  ~ 0,
+      TRUE              ~ (Lmat_cm - lower) / (upper - lower)
     ),
     p_adult = if_else(is.na(p_juv), NA_real_, 1 - p_juv)
   )
 
-# Turn probabilities into juvenile/adult counts
 fish_long_life_prob <- fish_long_prob %>%
   filter(!is.na(p_juv), !is.na(Count)) %>%
   mutate(
     n_juv   = round(Count * p_juv),
     n_adult = Count - n_juv
   ) %>%
-  tidyr::pivot_longer(
+  pivot_longer(
     cols      = c(n_juv, n_adult),
     names_to  = "life_stage",
     values_to = "stage_Count"
   ) %>%
-  filter(stage_Count > 0) %>%   
+  filter(stage_Count > 0) %>%
   mutate(
-    life_stage = recode(
-      life_stage,
-      "n_juv"   = "juvenile",
-      "n_adult" = "adult"
-    ),
+    life_stage = recode(life_stage, "n_juv" = "juvenile", "n_adult" = "adult"),
     life_stage = factor(life_stage, levels = c("juvenile", "adult"))
   )
 
-# Probabilistic life stage model (MAIN inference model)
+### 3) MAIN inference: probabilistic life-stage model ###########################
+
 m_stage_prob <- glmmTMB(
   stage_Count ~ Type * life_stage * Pair +
     date_num +
@@ -235,19 +111,89 @@ capture.output(
   file = file.path(stats_dir, paste0("m_stage_prob_summary_", analysis_date, ".txt"))
 )
 
-
-# save some key tables
 model_export(
   model       = m_stage_prob,
   model_name  = "T2_PrimaryInference_P",
   output_dir  = results_dir
 )
 
-## 6. PREDICTIONS AND PLOTS ###############################
-### Plot function for total fish and life stage models ###
+### 4) SUPPLEMENTARY: deterministic life-stage models ###########################
+
+m_stage <- glmmTMB(
+  Count ~ Type * life_stage +
+    date_num + Pair +
+    Count.Type +
+    offset(log(Inclusion_m)) +
+    (1 | Site) +
+    (1 | survey_id),
+  family = nbinom2,
+  data   = fish_long_life
+)
+
+saveRDS(m_stage, file.path(fits_dir, paste0("m_stage_deterministic_", analysis_date, ".rds")))
+capture.output(
+  summary(m_stage),
+  file = file.path(stats_dir, paste0("m_stage_deterministic_summary_", analysis_date, ".txt"))
+)
+
+model_export(
+  model       = m_stage,
+  model_name  = "S99_DeterministicLS_P",
+  output_dir  = results_dir
+)
+
+m_stage_fx <- glmmTMB(
+  Count ~ Type * life_stage * Pair +
+    date_num +
+    Count.Type +
+    offset(log(Inclusion_m)) +
+    (1 | Site) +
+    (1 | survey_id),
+  family = nbinom2,
+  data   = fish_long_life
+)
+
+saveRDS(m_stage_fx, file.path(fits_dir, paste0("m_stage_deterministic_pair_", analysis_date, ".rds")))
+capture.output(
+  summary(m_stage_fx),
+  file = file.path(stats_dir, paste0("m_stage_deterministic_pair_summary_", analysis_date, ".txt"))
+)
+
+### 5) Size structure model #####################################################
+
+m1 <- glmmTMB(
+  Count ~ Type * Size_Class_f +
+    Pair +
+    Count.Type +
+    offset(log(Inclusion_m)) +
+    (1 | Site) +
+    (1 | survey_id),
+  ziformula = ~ Type + Size_Class_f,
+  family    = nbinom2,
+  data      = fish_long
+)
+
+saveRDS(m1, file.path(fits_dir, paste0("m1_size_structure_", analysis_date, ".rds")))
+capture.output(
+  summary(m1),
+  file = file.path(stats_dir, paste0("m1_size_structure_summary_", analysis_date, ".txt"))
+)
+
+model_export(
+  model       = m1,
+  model_name  = "S5_sizestruct_P",
+  output_dir  = results_dir
+)
+
+emm_m1 <- emmeans(m1, ~ Type | Size_Class_f, offset = log(100))
+capture.output(
+  pairs(emm_m1),
+  file = file.path(stats_dir, paste0("m1_emm_summary_", analysis_date, ".txt"))
+)
+
+### 6) Predictions and plots ####################################################
 
 make_totalfish_plots <- function(m1,
-                                 m_time,
                                  m_stage_fx,
                                  m_stage_prob,
                                  origin_date,
@@ -256,11 +202,10 @@ make_totalfish_plots <- function(m1,
                                  reef_cols,
                                  theme_clean) {
   
-  # Figure 1. Total fish density by reef type and pair
   pred_tot <- ggpredict(
     m1,
     terms     = c("Type", "Pair"),
-    condition = c(Inclusion_m = 100)    # per 100 m2
+    condition = c(Inclusion_m = 100)
   ) %>% as.data.frame()
   
   p_tot <- ggplot(pred_tot, aes(x = x, y = predicted, color = group)) +
@@ -286,8 +231,6 @@ make_totalfish_plots <- function(m1,
     dpi      = 300
   )
   
-  
-  # Figure 2. Size structure by reef type
   pred_size <- ggpredict(
     m1,
     terms     = c("Size_Class_f", "Type"),
@@ -320,8 +263,7 @@ make_totalfish_plots <- function(m1,
     dpi      = 300
   )
   
-  # make size classes an ordered factor so the line is smooth along x
-  pred_size <- pred_size %>%
+  pred_size_pub <- pred_size %>%
     mutate(
       x = factor(
         x,
@@ -332,7 +274,7 @@ make_totalfish_plots <- function(m1,
     )
   
   p_size_pub <- ggplot(
-    pred_size,
+    pred_size_pub,
     aes(x = x, y = predicted, color = group, fill = group, group = group)
   ) +
     geom_ribbon(
@@ -346,9 +288,7 @@ make_totalfish_plots <- function(m1,
     scale_fill_manual(values = reef_cols) +
     scale_y_continuous(expand = expansion(mult = c(0.05, 0.10))) +
     theme_clean +
-    theme(
-      axis.text.x = element_text(angle = 35, hjust = 1)
-    ) +
+    theme(axis.text.x = element_text(angle = 35, hjust = 1)) +
     labs(
       x     = "Size class (cm)",
       y     = "Predicted density per 100 m²",
@@ -357,60 +297,21 @@ make_totalfish_plots <- function(m1,
     )
   
   ggsave(
-    filename = file.path(plots_dir, paste0("Fig2_size_structure_pub", analysis_date, ".png")),
+    filename = file.path(plots_dir, paste0("Fig2_size_structure_pub_", analysis_date, ".png")),
     plot     = p_size_pub,
     width    = 7,
     height   = 4.5,
     dpi      = 300
   )
   
-  # Figure 3. Time trend in total density by reef type
-  pred_time <- ggpredict(
-    m_time,
-    terms     = c("date_s [minmax]", "Type"),
-    condition = c(Inclusion_m = 100)
-  ) %>% as.data.frame()
-  
-  pred_time$x_date <- origin_date + pred_time$x
-  
-  p_time <- ggplot(pred_time, aes(x = x_date, y = predicted, color = group)) +
-    geom_line(linewidth = 0.9) +
-    geom_ribbon(
-      aes(ymin = conf.low, ymax = conf.high, fill = group),
-      alpha = 0.15,
-      color = NA
-    ) +
-    scale_color_manual(values = reef_cols) +
-    scale_fill_manual(values = reef_cols) +
-    theme_clean +
-    labs(
-      x     = "Date",
-      y     = "Predicted density per 100 m²",
-      color = "Reef type",
-      fill  = "Reef type"
-    )
-  
-  ggsave(
-    filename = file.path(plots_dir, paste0("Fig3_time_trend_", analysis_date, ".png")),
-    plot     = p_time,
-    width    = 6.5,
-    height   = 4.5,
-    dpi      = 300
-  )
-  
-  
-  # Supplementary: deterministic life stage (juvenile / mixed / adult)
   pred_stage_det <- ggpredict(
     m_stage_fx,
     terms     = c("life_stage", "Type", "Pair"),
     condition = c(Inclusion_m = 100)
-  ) %>% as.data.frame()
-  
-  pred_stage_det$x <- factor(
-    pred_stage_det$x,
-    levels = c("juvenile", "mixed", "adult"),
-    ordered = TRUE
-  )
+  ) %>% as.data.frame() %>%
+    mutate(
+      x = factor(x, levels = c("juvenile", "mixed", "adult"), ordered = TRUE)
+    )
   
   p_pair_det <- ggplot(
     pred_stage_det,
@@ -444,8 +345,6 @@ make_totalfish_plots <- function(m1,
     dpi      = 300
   )
   
-  
-  # Main: probabilistic life stage (juvenile vs adult)
   pred_stage_prob <- ggpredict(
     m_stage_prob,
     terms     = c("life_stage", "Type", "Pair"),
@@ -483,12 +382,11 @@ make_totalfish_plots <- function(m1,
     height   = 4.5,
     dpi      = 300
   )
-  # Return plots in case you want them in the console
+  
   invisible(list(
     p_tot       = p_tot,
     p_size      = p_size,
-    p_size_pub = p_size_pub,
-    p_time      = p_time,
+    p_size_pub  = p_size_pub,
     p_pair_det  = p_pair_det,
     p_pair_prob = p_pair_prob
   ))
@@ -496,7 +394,6 @@ make_totalfish_plots <- function(m1,
 
 plots_totalfish <- make_totalfish_plots(
   m1            = m1,
-  m_time        = m_time,
   m_stage_fx    = m_stage_fx,
   m_stage_prob  = m_stage_prob,
   origin_date   = origin_date,
@@ -505,16 +402,10 @@ plots_totalfish <- make_totalfish_plots(
   reef_cols     = reef_cols,
   theme_clean   = theme_clean
 )
-# can then inspect any plot interactively with e.g. plots_totalfish$p_pair_prob.
-
 
 plots_totalfish$p_pair_prob
 
-
-
-
-# extract constrasts 
-library(emmeans)
+### 7) Contrasts and exports (primary inference) ################################
 
 em_ls_pair <- emmeans(
   m_stage_prob,
@@ -522,49 +413,35 @@ em_ls_pair <- emmeans(
   at = list(
     Inclusion_m = 100,
     date_num    = 0,
-    Count.Type  = "Belt"  
+    Count.Type  = "Belt"
   ),
   type = "response"
 )
 
-ct_ls_pair <- as.data.frame(
-  contrast(em_ls_pair, method = "revpairwise")
-)
-# Export emmeans contrasts table (Table 3 style)
+ct_ls_pair <- as.data.frame(contrast(em_ls_pair, method = "revpairwise"))
+
 out_ct <- file.path(results_dir, paste0("T3_PrimaryInference_emmeans_contrasts_", analysis_date, ".csv"))
 write.csv(ct_ls_pair, out_ct, row.names = FALSE)
 
-# Optional: also save the emmeans grid for traceability
 out_em <- file.path(results_dir, paste0("T3_PrimaryInference_emmeans_grid_", analysis_date, ".csv"))
 write.csv(as.data.frame(em_ls_pair), out_em, row.names = FALSE)
 
-
-
-
-# Juvenile artificial-reef densities compared among site pairs
 em_juv_AR <- emmeans(
   m_stage_prob,
   ~ Pair,
   at = list(
     Type        = "Artificial",
-    life_stage = "juvenile",
+    life_stage  = "juvenile",
     Inclusion_m = 100,
     date_num    = 0,
-    Count.Type= "Belt"
+    Count.Type  = "Belt"
   ),
   type = "response"
 )
 
-ct_juv_AR <- as.data.frame(
-  contrast(em_juv_AR, method = "pairwise")
-)
+ct_juv_AR <- as.data.frame(contrast(em_juv_AR, method = "pairwise"))
 
-ct_juv_AR
+out_ct2 <- file.path(results_dir, paste0("T3b_PrimaryInference_emmeans_contrasts_", analysis_date, ".csv"))
+write.csv(ct_juv_AR, out_ct2, row.names = FALSE)
 
-# Export emmeans contrasts table (Table 3 style)
-out_ct <- file.path(results_dir, paste0("T3b_PrimaryInference_emmeans_contrasts_", analysis_date, ".csv"))
-write.csv(ct_juv_AR, out_ct, row.names = FALSE)
-
-message("✅ Main models done! Plots and results saved to to: ", output_dir)
-
-
+message("Main models done. Plots and results saved to: ", output_dir)

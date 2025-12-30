@@ -6,14 +6,14 @@ suppressPackageStartupMessages({
   library(tibble)
 })
 
-## Main cleaning function ####################################################
+#### Main cleaning function ####
 
 clean_fish_size <- function(file_path, output_dir) {
   
-  ## 1. Read raw data --------------------------------------------------------
+  ## 1. Read raw data ####
   raw_fish <- read.csv(file_path, stringsAsFactors = TRUE, strip.white = TRUE)
   
-  ## 2. Standardise site names and attach site metadata ----------------------
+  ## 2. Standardise site names and attach site metadata ####
   fish_size <- raw_fish %>%
     mutate(
       Site_raw = Site,
@@ -44,7 +44,7 @@ clean_fish_size <- function(file_path, output_dir) {
       Site = factor(Site)
     )
   
-  ## 3. Dates and Month_Year -------------------------------------------------
+  ## 3. Dates and Month_Year #### 
   fish_size <- fish_size %>%
     mutate(
       Date = as.Date(as.character(Date_mm.dd.yy), format = "%m/%d/%Y"),
@@ -59,7 +59,7 @@ clean_fish_size <- function(file_path, output_dir) {
     dplyr::select(-Date_mm.dd.yy, -Site_raw) %>% 
     mutate(Month_Year = factor(Month_Year))
   
-  ## 4. Rename size bins to bin_*_* -----------------------------------------
+  ## 4. Rename size bins to bin_*_* ####
   size_cols <- grep("^X", names(fish_size), value = TRUE)
   
   new_size_names <- size_cols |>
@@ -68,7 +68,7 @@ clean_fish_size <- function(file_path, output_dir) {
   
   names(fish_size)[match(size_cols, names(fish_size))] <- new_size_names
   
-  ## 5. Structural size-bin NAs ----------------------------------------------
+  ## 5. Structural size-bin NAs #### 
   ### Species that should never exceed 20 cm
   spp_max20 <- c(
     "Damsels - Regal Demoiselle",
@@ -94,7 +94,7 @@ clean_fish_size <- function(file_path, output_dir) {
                           NA_integer_, bin_100)
     )
   
-  ## 6. Functional group lookup ----------------------------------------------
+  ## 6. Functional group lookup ####
   spp_lookup <- tibble::tribble(
     ~Species,                          ~fgroup,
     "Angel - Blue-ringed",            "Invertivore",
@@ -170,7 +170,7 @@ clean_fish_size <- function(file_path, output_dir) {
       Species = factor(Species),
       Sci_Name = factor(Sci_Name))
   
-  ## 7. Time cleaning (Time (hh:mm)) -----------------------------------------
+  ## 7. Time cleaning (Time (hh:mm)) ####
   fish_size <- fish_size %>%
     mutate(
       Time = as.character(Time_start),
@@ -181,7 +181,7 @@ clean_fish_size <- function(file_path, output_dir) {
       )
     )
   
-  ## 8. Reorder columns: survey info, covariates, counts ---------------------
+  ## 8. Reorder columns: survey info, covariates, counts ####
   survey_cols <- c(
     "Site", "Pair", "Type",
     "Date", "Month_Year",
@@ -207,7 +207,7 @@ clean_fish_size <- function(file_path, output_dir) {
   
 
   
-  ## 9. Save cleaned file ----------------------------------------------------
+  ## 9. Save cleaned file ####
   out_path <- file.path(output_dir, "fish_size_cleaned.rds")
   saveRDS(fish_size, out_path)
   message("✅ Saved 'fish_size_cleaned.rds' to: ", out_path)
@@ -223,7 +223,7 @@ str(fish_size)
 
 fish_size <- readRDS(file.path(output_dir, "fish_size_cleaned.rds"))
 
-## Build long format for size classes #######################################
+## Build long format for size classes ####
 
 # Identify size class columns
 size_cols <- grep("^bin_", names(fish_size), value = TRUE)

@@ -1,4 +1,6 @@
-### 04_JUVENILE_PROPORTIONS.R ###
+### 04_JUVENILE_PROPORTIONS.R ### 
+
+###################### not used in final manuscript ########################
 suppressPackageStartupMessages({
 library(dplyr)
 library(ggplot2)
@@ -80,12 +82,5 @@ ggsave(
 
 
 
-
-# save some key tables
-model_export(
-  model       = m_stage_prob,
-  model_name  = "T2_FG_C",
-  output_dir  = results_dir
-)
 
 message("✅ 3A: Juvenile Proportions done! Plots and results saved to to: ", output_dir)

@@ -5,7 +5,7 @@ library(dplyr)
 library(ggeffects)
 library(ggplot2)
 
-### Prepare functional group x life-stage data ###
+### Prepare functional group x life-stage data ####
 
 # Aggregate stage-level counts per survey x functional group
 fish_fg_ls <- fish_long_life_prob %>%
@@ -29,7 +29,7 @@ fish_fg_ls <- fish_long_life_prob %>%
     life_stage = factor(life_stage, levels = c("juvenile", "adult"))
   )
 
-### Fit multigroup functional group x life-stage model (main text) ###
+### Fit multigroup functional group x life-stage model (main text) ####
 
 m_fg_stage <- glmmTMB(
   stage_Count ~ Type * life_stage * fgroup +
@@ -62,7 +62,7 @@ capture.output(
   file = file.path(stats_dir, paste0("m_fg_stage_summary_", analysis_date, ".txt"))
 )
 
-### Plot function for functional group x life-stage model ###
+### Plot function for functional group x life-stage model ####
 
 make_fg_stage_plots <- function(m_fg_stage,
                                 plots_dir,
@@ -276,7 +276,7 @@ make_fg_stage_plots <- function(m_fg_stage,
   ))
 }
 
-### Call the functional group stage-level plot function ###
+### Call the functional group stage-level plot function ####
 
 plots_fg_stage <- make_fg_stage_plots(
   m_fg_stage   = m_fg_stage,

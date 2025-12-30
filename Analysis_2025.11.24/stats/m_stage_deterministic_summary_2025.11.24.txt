@@ -1,6 +1,5 @@
  Family: nbinom2  ( log )
-Formula:          Count ~ Type * life_stage + date_num + Pair + Count.Type + offset(log(Inclusion_m)) +  
-    (1 | Site) + (1 | survey_id)
+Formula:          Count ~ Type * life_stage + date_num + Pair + Count.Type + offset(log(Inclusion_m)) +      (1 | Site) + (1 | survey_id)
 Data: fish_long_life
 
       AIC       BIC    logLik -2*log(L)  df.resid 
@@ -10,7 +9,7 @@ Random effects:
 
 Conditional model:
  Groups    Name        Variance  Std.Dev.
- Site      (Intercept) 7.894e-08 0.000281
+ Site      (Intercept) 7.895e-08 0.000281
  survey_id (Intercept) 6.935e-01 0.832771
 Number of obs: 38010, groups:  Site, 6; survey_id, 164
 

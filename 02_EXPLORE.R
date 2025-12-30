@@ -12,7 +12,7 @@ suppressPackageStartupMessages({
   library(RColorBrewer)
 })
 
-## Inputs ###################################################################
+## Inputs #####
 
 stopifnot(exists("output_dir"))
 
@@ -21,11 +21,11 @@ dir.create(eda_dir, showWarnings = FALSE, recursive = TRUE)
 
 fish_size <- readRDS(file.path(output_dir, "fish_size_cleaned.rds"))
 
-## Helper: base plotting theme ##############################################
+## Helper: base plotting theme ####
 
 base_theme <- if (exists("theme_clean")) theme_clean else theme_minimal()
 
-## Zuur-style EDA function ##################################################
+## Zuur-style EDA function ####
 
 zuur_eda <- function(dat,
                      output_dir = NULL,
@@ -40,7 +40,7 @@ zuur_eda <- function(dat,
       day_id = interaction(site, Date, drop = TRUE)
     )
   
-  ## Effort: unique surveys per site ########################################
+  ## Effort: unique surveys per site ####
   surv <- d %>%
     dplyr::distinct(site, type, Date, survey_id)
   
@@ -56,7 +56,7 @@ zuur_eda <- function(dat,
     ) +
     base_theme
   
-  ## Species-level zero inflation ###########################################
+  ## Species-level zero inflation ####
   species_zero <- d %>%
     group_by(Species) %>%
     summarise(
@@ -83,7 +83,7 @@ zuur_eda <- function(dat,
     ) +
     base_theme
   
-  ## Per survey richness ####################################################
+  ## Per survey richness ####
   richness <- d %>%
     group_by(survey_id) %>%
     summarise(
@@ -100,7 +100,7 @@ zuur_eda <- function(dat,
     ) +
     base_theme
   
-  ## Core count diagnostics #################################################
+  ## Core count diagnostics ####
   zero_rate_all <- mean(d$Count == 0, na.rm = TRUE)
   
   m_pois <- glm(Count ~ 1, data = d, family = poisson())
@@ -150,7 +150,7 @@ zuur_eda <- function(dat,
     ) +
     base_theme
   
-  ## Extra covariate EDA ####################################################
+  ## Extra covariate EDA ####
   d <- d %>%
     mutate(hour = lubridate::hour(hms(Time)))
   
@@ -194,7 +194,7 @@ zuur_eda <- function(dat,
     theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
     base_theme
   
-  ## Save plots and CSVs ####################################################
+  ## Save plots and CSVs ####
   if (!is.null(output_dir) && (save_plots || save_csv)) {
     dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
   }
@@ -260,7 +260,7 @@ zuur_eda <- function(dat,
 
 ## Run EDA ###################################################################
 
-# fish_long should already exist from 01_CLEAN.R
+# fish_long exists from 01_CLEAN.R
 eda <- zuur_eda(
   dat        = fish_long,
   output_dir = eda_dir,
@@ -273,7 +273,7 @@ eda <- zuur_eda(
 print(eda$metrics)
 eda$species$flags
 
-## Basic size structure summaries ###########################################
+## Basic size structure summaries ####
 
 # Surveys per site
 survey_counts <- fish_long %>%
@@ -305,7 +305,7 @@ readr::write_csv(
   file.path(eda_dir, "total_abundance_by_pair_site.csv")
 )
 
-## Size class distribution plots ############################################
+## Size class distribution plots #####
 
 # Normalised by number of surveys per site
 fish_long_norm <- fish_long %>%
@@ -379,7 +379,7 @@ ggsave(
   width = 9, height = 7, dpi = 300
 )
 
-## Histograms of counts #####################################################
+## Histograms of counts #####
 
 ggplot(fish_long, aes(x = Count)) +
   geom_histogram(binwidth = 1, color = "white", fill = "grey40") +
@@ -401,7 +401,7 @@ ggplot(filter(fish_long, Count > 0), aes(x = Count)) +
   coord_cartesian(xlim = c(0, 50)) +
   theme_minimal()
 
-## Proportion of fish in each size class by reef type #######################
+## Proportion of fish in each size class by reef type #####
 
 size_prop_type <- fish_long %>%
   group_by(type, Size_Class) %>%
