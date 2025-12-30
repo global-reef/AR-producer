@@ -45,6 +45,12 @@ m_fg_stage <- glmmTMB(
 
 summary(m_fg_stage)
 
+model_export(
+  model       = m_fg_stage,
+  model_name  = "T4_FG_STAGE_P",
+  output_dir  = results_dir
+)
+
 
 saveRDS(
   m_fg_stage,

@@ -59,6 +59,18 @@ m_adult <- glmmTMB(
   data   = juv_adult_total
 )
 
+model_export(
+  model       = m_juv,
+  model_name  = "Sx_JuvProb_P",
+  output_dir  = results_dir
+)
+
+model_export(
+  model       = m_adult,
+  model_name  = "Sx_AdProb_P",
+  output_dir  = results_dir
+)
+
 saveRDS(m_juv,  file.path(fits_dir,  paste0("m_final_juv_",  analysis_date, ".rds")))
 saveRDS(m_adult,file.path(fits_dir,  paste0("m_final_adult_",analysis_date, ".rds")))
 

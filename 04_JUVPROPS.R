@@ -78,4 +78,14 @@ ggsave(
   dpi      = 300
 )
 
-message("✅ 3A: Juvenile Proportions done! Plots and resules saved to to: ", output_dir)
+
+
+
+# save some key tables
+model_export(
+  model       = m_stage_prob,
+  model_name  = "T2_FG_C",
+  output_dir  = results_dir
+)
+
+message("✅ 3A: Juvenile Proportions done! Plots and results saved to to: ", output_dir)

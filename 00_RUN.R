@@ -23,6 +23,7 @@ plots_dir <- file.path(output_dir, "plots")
 stats_dir <- file.path(output_dir, "stats")
 summ_dir  <- file.path(output_dir, "summaries")
 eda_dir  <- file.path(output_dir, "eda")
+results_dir  <- file.path(output_dir, "tables")
 dir.create(fits_dir,  showWarnings = FALSE, recursive = TRUE)
 dir.create(plots_dir, showWarnings = FALSE, recursive = TRUE)
 dir.create(stats_dir, showWarnings = FALSE, recursive = TRUE)
@@ -49,6 +50,44 @@ fg_cols <- c(
   "HTLP" = "#253494"
 ) 
 reef_cols <- c("Natural" = "#66BFA6", "Artificial" = "#007A87")
+
+
+#### a nice helper function for saving model summaries to csv #### 
+model_export <- function(model, model_name, output_dir, sigfigs = 3) {
+  
+  if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
+  
+  library(broom.mixed)
+  library(dplyr)
+  
+  fx <- broom.mixed::tidy(model, effects = "fixed", conf.int = TRUE)
+  
+  fx_out <- fx %>%
+    transmute(
+      Effect   = term,
+      Estimate = signif(estimate, sigfigs),
+      SE       = signif(std.error, sigfigs),
+      CI       = paste0("[",
+                        signif(conf.low,  sigfigs), ", ",
+                        signif(conf.high, sigfigs), "]"),
+      p_value  = ifelse(p.value < 0.001,
+                        "<0.001",
+                        formatC(p.value, format = "f", digits = 3))
+    )
+  
+  write.csv(
+    fx_out,
+    file = file.path(output_dir, paste0(model_name, "_summarytable.csv")),
+    row.names = FALSE
+  )
+  
+  invisible(fx_out)
+}
+
+
+# helper for p values
+format_p <- function(p) ifelse(p < 0.001, "<0.001",
+                               formatC(p, format = "f", digits = 3))
 
 
 

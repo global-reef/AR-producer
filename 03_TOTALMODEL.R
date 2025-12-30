@@ -43,6 +43,12 @@ capture.output(
   summary(m1),
   file = file.path(stats_dir, paste0("m1_size_structure_summary_", analysis_date, ".txt"))
 )
+# save some key tables
+model_export(
+  model       = m1,
+  model_name  = "S5_sizestruct_P",
+  output_dir  = results_dir
+)
 
 emm_m1 <- emmeans(m1, ~ Type | Size_Class_f, offset = log(100))
 pairs(emm_m1)
@@ -73,6 +79,12 @@ capture.output(
   file = file.path(stats_dir, paste0("m_time_size_time_summary_", analysis_date, ".txt"))
 )
 
+# save some key tables
+model_export(
+  model       = m_time,
+  model_name  = "S6_m_time_P",
+  output_dir  = results_dir
+)
 # Optional: site random effects check (interactive, not saved)
 # ranef(m_time)$cond$Site
 
@@ -140,6 +152,12 @@ capture.output(
   file = file.path(stats_dir, paste0("m_stage_deterministic_summary_", analysis_date, ".txt"))
 )
 
+# save some key tables
+model_export(
+  model       = m_stage,
+  model_name  = "S99_DeterministicLS_P",
+  output_dir  = results_dir
+)
 # With Pair interaction (supplementary final deterministic model)
 m_stage_fx <- glmmTMB(
   Count ~ Type * life_stage * Pair +
@@ -217,6 +235,13 @@ capture.output(
   file = file.path(stats_dir, paste0("m_stage_prob_summary_", analysis_date, ".txt"))
 )
 
+
+# save some key tables
+model_export(
+  model       = m_stage_prob,
+  model_name  = "T2_PrimaryInference_P",
+  output_dir  = results_dir
+)
 
 ## 6. PREDICTIONS AND PLOTS ###############################
 ### Plot function for total fish and life stage models ###
@@ -483,18 +508,63 @@ plots_totalfish <- make_totalfish_plots(
 # can then inspect any plot interactively with e.g. plots_totalfish$p_pair_prob.
 
 
+plots_totalfish$p_pair_prob
 
+
+
+
+# extract constrasts 
+library(emmeans)
 
 em_ls_pair <- emmeans(
   m_stage_prob,
   ~ Type | life_stage * Pair,
-  offset = log(100)
+  at = list(
+    Inclusion_m = 100,
+    date_num    = 0,
+    Count.Type  = "Belt"  
+  ),
+  type = "response"
 )
 
-ct_ls_pair <- as.data.frame(contrast(em_ls_pair, method = "revpairwise"))
+ct_ls_pair <- as.data.frame(
+  contrast(em_ls_pair, method = "revpairwise")
+)
+# Export emmeans contrasts table (Table 3 style)
+out_ct <- file.path(results_dir, paste0("T3_PrimaryInference_emmeans_contrasts_", analysis_date, ".csv"))
+write.csv(ct_ls_pair, out_ct, row.names = FALSE)
 
-ct_ls_pair
+# Optional: also save the emmeans grid for traceability
+out_em <- file.path(results_dir, paste0("T3_PrimaryInference_emmeans_grid_", analysis_date, ".csv"))
+write.csv(as.data.frame(em_ls_pair), out_em, row.names = FALSE)
 
-message("✅ Main models done! Plots and resules saved to to: ", output_dir)
+
+
+
+# Juvenile artificial-reef densities compared among site pairs
+em_juv_AR <- emmeans(
+  m_stage_prob,
+  ~ Pair,
+  at = list(
+    Type        = "Artificial",
+    life_stage = "juvenile",
+    Inclusion_m = 100,
+    date_num    = 0,
+    Count.Type= "Belt"
+  ),
+  type = "response"
+)
+
+ct_juv_AR <- as.data.frame(
+  contrast(em_juv_AR, method = "pairwise")
+)
+
+ct_juv_AR
+
+# Export emmeans contrasts table (Table 3 style)
+out_ct <- file.path(results_dir, paste0("T3b_PrimaryInference_emmeans_contrasts_", analysis_date, ".csv"))
+write.csv(ct_juv_AR, out_ct, row.names = FALSE)
+
+message("✅ Main models done! Plots and results saved to to: ", output_dir)
 
 
